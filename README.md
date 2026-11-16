@@ -81,7 +81,7 @@ python scratch\md1\pack_firmware.py
 
 ## 固件发布
 
-见仓库 **Releases**（当前 **v1.0.2**，含升级后断线提示与 igdmptd / cdrom_wizard 清理）：
+见仓库 **Releases**（当前 **v1.0.3**，含 WEP 64/128 位、监控每设备传输、表格排序与 120 秒升级重连提示）：
 
 - `wf2403-stock-firmware.bin` — 原厂升级镜像
 - `wf2403-custom-webui.bin` — 含本项目的自定义 WebUI 固件
