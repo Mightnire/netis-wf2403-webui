@@ -3,10 +3,26 @@
    ========================================================================== */
 
 /* ---------------- WIRELESS ---------------- */
-var REGION_CHANNELS = { "1": [1, 11], "2": [1, 11], "3": [1, 13], "4": [10, 11], "5": [10, 13], "6": [1, 14] };
+/* Mirrors the stock reg_map_2_4 table: 40 MHz narrows the usable channel
+   list depending on which side the control channel sits. */
+var REGION_CHANNELS = {
+  "1": { "20": [1, 11], "40l": [1, 9], "40u": [5, 11] },
+  "2": { "20": [1, 11], "40l": [1, 9], "40u": [5, 11] },
+  "3": { "20": [1, 13], "40l": [1, 9], "40u": [5, 13] },
+  "4": { "20": [10, 11], "40l": [10, 10], "40u": [11, 11] },
+  "5": { "20": [10, 13], "40l": [10, 10], "40u": [13, 13] },
+  "6": { "20": [1, 14], "40l": [1, 9], "40u": [5, 13] },
+  "_default": { "20": [1, 11], "40l": [1, 9], "40u": [5, 11] }
+};
 
-function fillChannels(select, region, selected) {
-  var range = REGION_CHANNELS[String(region)] || [1, 13];
+function channelRange(region, width, sideband) {
+  var set = REGION_CHANNELS[String(region)] || REGION_CHANNELS._default;
+  if (String(width) !== "1") return set["20"];
+  return String(sideband) === "1" ? set["40l"] : set["40u"];
+}
+
+function fillChannels(select, region, selected, width, sideband) {
+  var range = channelRange(region, width, sideband);
   var html = '<option value="0">' + esc(t("common.auto")) + "</option>";
   for (var ch = range[0]; ch <= range[1]; ch++) {
     html += '<option value="' + ch + '">' + ch + " (" + channelMhz(ch) + " MHz)</option>";
@@ -14,6 +30,34 @@ function fillChannels(select, region, selected) {
   select.innerHTML = html;
   select.value = String(selected == null ? 0 : selected);
   if (!select.value) select.value = "0";
+}
+
+/* Mirror the stock page: channel width only applies to 11n bands, and
+   control sideband only applies to 40 MHz. */
+function wlEffectiveWidth() {
+  var band = num($("wlBandSel").value, 10);
+  var wide = band === 7 || band === 9 || band === 10;
+  return wide ? $("wlWidth").value : "0";
+}
+
+function syncWlFields() {
+  var on = $("wlEn").checked;
+  var band = num($("wlBandSel").value, 10);
+  var wide = band === 7 || band === 9 || band === 10;
+  var is40 = String($("wlWidth").value) === "1";
+
+  ["wlSsidInput", "wlMac", "wlBandSel", "wlRegion", "wlChanSel"].forEach(function (id) {
+    $(id).disabled = !on;
+  });
+  $("wlModeSel").disabled = true;
+  $("wlWidth").disabled = !on || !wide;
+  $("wlSideBand").disabled = !on || !wide || !is40;
+  $("wlBroad").disabled = !on;
+}
+
+function refreshWlChannels(selected) {
+  var keep = selected == null ? $("wlChanSel").value : selected;
+  fillChannels($("wlChanSel"), $("wlRegion").value, keep, wlEffectiveWidth(), $("wlSideBand").value);
 }
 
 function loadWireless() {
@@ -34,16 +78,19 @@ function loadWirelessBasic() {
 
     $("wlEn").checked = String(wl.wlb_enable) === "1";
     $("wlSsidInput").value = wl.wlb_ssid || "";
+    $("wlMac").value = formatMac(st.wl_mac || wl.wl_mac || "");
     $("wlModeSel").value = String(num(wl.wlb_mode, 0));
     $("wlModeSel").disabled = true;
     $("wlModeSel").title = t("wl.modeLocked");
     $("wlWidth").value = String(num(wl.wlb_channel_width, 0));
+    $("wlSideBand").value = String(num(wl.wlb_side_band, 1));
     $("wlBandSel").value = String(num(wl.wlb_band, 10));
     $("wlBroad").checked = String(wl.wlb_net_type) === "1";
 
     var region = String(st.domain || "3");
     $("wlRegion").value = region;
-    fillChannels($("wlChanSel"), region, num(wl.wlb_chan, 0));
+    fillChannels($("wlChanSel"), region, num(wl.wlb_chan, 0), wlEffectiveWidth(), $("wlSideBand").value);
+    syncWlFields();
 
     renderWirelessSummary();
     loadAdvanced();
@@ -52,17 +99,25 @@ function loadWirelessBasic() {
 
 function saveWirelessBasic() {
   var wl = S.data.wl || {};
-  var st = (S.data.wlStatus && (S.data.wlStatus.sec_ap0 || S.data.wlStatus)) || {};
+  var mac = macValue("wlMac");
+  if (!/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)) {
+    toast(t("err.err_mac"), "err");
+    return;
+  }
+  var band = num($("wlBandSel").value, 10);
+  var wide = band === 7 || band === 9 || band === 10;
+  var width = wide ? $("wlWidth").value : "0";
+  var side = $("wlSideBand").value;
   var params = {
     AP_SSID: $("wlSsidInput").value,
     wirel_bas_work_status: $("wlEn").checked ? "1" : "0",
     band: $("wlBandSel").value || "10",
     radio_mode: $("wlModeSel").value,
     net_type: $("wlBroad").checked ? "1" : "0",
-    channel_width: $("wlWidth").value,
+    channel_width: width,
     Region: $("wlRegion").value,
-    wireless_mac: st.wl_mac || wl.wl_mac || "",
-    wirel_side_band: wl.wlb_side_band || "0",
+    wireless_mac: mac,
+    wirel_side_band: side,
     ap_chan: $("wlChanSel").value,
     client_type: wl.wlb_client_type || "0"
   };
@@ -75,11 +130,16 @@ function loadWirelessSecurity() {
     if (!wl) return;
     S.data.wl = wl;
     $("secMode").value = String(num(wl.wls_ap_type, 0));
-    var secMode = num(wl.wls_ap_type, 0);
-    $("secKey").value = secMode === 1 ? (wl.wls_ap_wep_key || "") : (wl.wls_ap_wpa_key || "");
+    $("secKey").value = wl.wls_ap_wpa_key || "";
     $("secRekey").value = wl.wls_ap_wpa_keytime || "86400";
     var cipher = String(wl.wls_ap_wpa_tkaes || "2");
     $("secCipher").value = cipher === "1" ? "TKIP" : cipher === "3" ? "MIX_TKIP_AES" : "AES";
+
+    var wepLen = String(wl.wls_ap_wep_64128 || "1");
+    $("wepKeyLen").value = wepLen === "2" ? "2" : "1";
+    $("wepKeyFmt").value = String(wl.wls_ap_wep_16asc == null ? "0" : wl.wls_ap_wep_16asc) === "1" ? "1" : "0";
+    $("wepKey").value = wl.wls_ap_wep_key || "";
+
     updateSecFields();
   });
 }
@@ -88,13 +148,57 @@ function updateSecFields() {
   var mode = num($("secMode").value);
   var wep = mode === 1;
   var open = mode === 0;
-  $("secCipherRow").classList.toggle("hidden", wep || open);
-  $("secKey").parentNode.classList.toggle("hidden", open);
-  $("secKey").parentNode.querySelector("label").textContent = wep ? "WEP key" : t("wl.passphrase");
+  $("secWpaBox").classList.toggle("hidden", wep || open);
+  $("secWepBox").classList.toggle("hidden", !wep);
+  if (wep) updateWepFields();
+}
+
+function wepKeyMax() {
+  var bits = $("wepKeyLen").value === "2" ? 104 : 40;
+  var hex = $("wepKeyFmt").value === "1";
+  return hex ? (bits === 104 ? 26 : 10) : (bits === 104 ? 13 : 5);
+}
+
+function updateWepFields() {
+  var max = wepKeyMax();
+  var hex = $("wepKeyFmt").value === "1";
+  $("wepKey").maxLength = max;
+  $("wepKey").placeholder = max + (hex ? " HEX" : " ASCII");
+  $("wepHint").textContent = t(hex ? "wl.wepHintHex" : "wl.wepHintAscii").replace("{n}", max);
+}
+
+function wepParams() {
+  var bits = $("wepKeyLen").value === "2" ? 104 : 40;
+  var hex = $("wepKeyFmt").value === "1";
+  var key = $("wepKey").value;
+  var need = hex ? (bits === 104 ? 26 : 10) : (bits === 104 ? 13 : 5);
+  var ok = hex
+    ? new RegExp("^[0-9a-fA-F]{" + need + "}$").test(key)
+    : key.length === need && !/['"\\]/.test(key);
+  if (!ok) { toast(t("err.err_key"), "err"); return null; }
+  return {
+    wpaMode: "WEP",
+    KeySize0: bits === 104 ? "104" : "40",
+    keymode: hex ? "hex" : "asc",
+    ap_wpa_mode: "0",
+    KeyVal1: key, KeyVal2: key, KeyVal3: key, KeyVal4: key,
+    TxKey: "1",
+    wpaCipherSuite: "AES",
+    PreKeyVal: "",
+    PreKeyVal_len: "0",
+    wpaPhrase: "",
+    wpaGrpReKeyTime: "86400"
+  };
 }
 
 function saveWirelessSecurity() {
   var mode = num($("secMode").value);
+  if (mode === 1) {
+    var wep = wepParams();
+    if (!wep) return;
+    applyRadio("wirel_sec_set.cgi", wep);
+    return;
+  }
   var key = $("secKey").value;
   if (mode !== 0 && !key) { toast(t("err.err_key"), "err"); return; }
   var params = wpaParams(mode, key);
@@ -214,11 +318,13 @@ function renderSurvey(list, sel, withJoin) {
 function loadHosts() {
   return Promise.all([
     get("wireless_ASSOCIATE_HOST_show.cgi").catch(function () { return null; }),
-    get("topwl_wireless_show.cgi").catch(function () { return null; })
+    get("topwl_wireless_show.cgi").catch(function () { return null; }),
+    get("dhcp_client_show.cgi").catch(function () { return []; })
   ]).then(function (r) {
     var hosts = (r[0] && r[0].sec_ap0) || [];
     if (!Array.isArray(hosts)) hosts = [];
     S.data.hosts = hosts;
+    if (Array.isArray(r[2])) S.data.leases = r[2];
     renderHosts(hosts);
     if (r[1]) S.data.wl = r[1];
   });
@@ -354,7 +460,7 @@ function detectWan() {
 }
 
 function saveWanMac() {
-  var mac = $("macInput").value.trim();
+  var mac = macValue("macInput");
   if (!/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)) { toast(t("err.err_mac"), "err"); return; }
   apply("wan_work_mode_mac_set.cgi", { physical_address: mac }, { after: function () { setTimeout(loadWan, 1200); } });
 }
@@ -412,7 +518,8 @@ function loadLan() {
       $("dhcpLease").value = dhcp.lease_time || "86400";
       S.data.leases = Array.isArray(r[2]) ? r[2] : [];
       renderLeases(S.data.leases);
-      renderReservations(dhcp.ip_reserve || []);
+      S.data.reservations = dhcp.ip_reserve || [];
+      renderReservations(S.data.reservations);
     }
   });
 }
@@ -444,11 +551,26 @@ function renderReservations(list) {
   });
 }
 
+function bindLease(mac, ip) {
+  mac = formatMac(mac);
+  ip = String(ip || "").trim();
+  if (!mac || !ip) return;
+  var list = S.data.reservations || [];
+  var exists = list.some(function (x) {
+    var m = typeof x === "string" ? x.split(",")[0] : (x.mac || x.mac_address || "");
+    return formatMac(m) === mac;
+  });
+  if (exists) { toast(t("lan.alreadyBound"), "warn"); return; }
+  apply("dhcp_ip_reserving_add.cgi", { lan_mac_address: mac, lanipaddre: ip }, {
+    msg: t("lan.reserveAdded"), after: function () { setTimeout(loadLan, 900); }
+  });
+}
+
 function addReservation() {
   var body = document.createElement("div");
   body.innerHTML =
-    '<div class="field"><label>' + esc(t("lan.reserveMac")) + '</label><div class="input-with-sel"><input type="text" id="rsvMac" maxlength="17" placeholder="00:11:22:33:44:55"><span class="devsel-slot" data-target="rsvMac" data-kind="mac"></span></div></div>' +
-    '<div class="field"><label>' + esc(t("lan.reserveIp")) + '</label><div class="input-with-sel"><input type="text" id="rsvIp" maxlength="15" placeholder="192.168.1.50"><span class="devsel-slot" data-target="rsvIp" data-kind="ip"></span></div></div>';
+    '<div class="field"><label>' + esc(t("lan.reserveMac")) + '</label><div class="input-with-sel"><input type="text" id="rsvMac" maxlength="17" placeholder="00:11:22:33:44:55" data-mac="1"><span class="devsel-slot" data-target="rsvMac" data-kind="mac" data-fill-ip="rsvIp"></span></div></div>' +
+    '<div class="field"><label>' + esc(t("lan.reserveIp")) + '</label><div class="input-with-sel"><input type="text" id="rsvIp" maxlength="15" placeholder="192.168.1.50"></div></div>';
   fillDeviceSlots(body);
   dialog({
     title: t("lan.addReserve"), body: body,
@@ -456,7 +578,7 @@ function addReservation() {
       { label: t("common.cancel") },
       {
         label: t("common.save"), primary: true, onClick: function () {
-          var mac = $("rsvMac").value.trim(), ip = $("rsvIp").value.trim();
+          var mac = macValue("rsvMac"), ip = $("rsvIp").value.trim();
           if (!/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)) { toast(t("err.err_mac"), "err"); return false; }
           if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) { toast(t("err.err_ip"), "err"); return false; }
           apply("dhcp_ip_reserving_add.cgi", { lan_mac_address: mac, lanipaddre: ip }, {
@@ -696,7 +818,7 @@ function loadSecurity() {
 
     DMZ_STATE.super = String(dmz.super_dmz_enable) === "1";
     renderDmzState();
-    $("superDmzMac").value = dmz.super_dmz_mac && dmz.super_dmz_mac !== "00:00:00:00:00:00" ? dmz.super_dmz_mac : "";
+    $("superDmzMac").value = dmz.super_dmz_mac && dmz.super_dmz_mac !== "00:00:00:00:00:00" ? formatMac(dmz.super_dmz_mac) : "";
     $("upnpEnable").checked = String((r[2] || {}).upnp_enable) === "1";
     PT = Array.isArray(r[6]) ? r[6] : [];
     renderPortTriggers();
@@ -813,7 +935,7 @@ function saveDmz() {
 }
 
 function saveSuperDmz() {
-  var mac = $("superDmzMac").value.trim();
+  var mac = macValue("superDmzMac");
   if (DMZ_STATE.super && !/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)) {
     toast(t("err.err_mac"), "err");
     return;
@@ -838,7 +960,7 @@ function setDmzTab(tab) {
 
 function saveActiveDmz() {
   var isSuper = DMZ_TAB === "super";
-  var mac = $("superDmzMac").value.trim();
+  var mac = macValue("superDmzMac");
   var ip = $("dmzIp").value.trim();
   var req = [];
   if (isSuper) {
@@ -1032,7 +1154,7 @@ function saveRemote() {
 }
 
 function sendWol() {
-  var mac = $("wolMac").value.trim();
+  var mac = macValue("wolMac");
   if (!/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)) { toast(t("err.err_mac"), "err"); return; }
   apply("wakeup.cgi", { computermac: mac }, { msg: t("sys.wolSent") });
 }
@@ -1075,15 +1197,19 @@ function upgradeFirmware() {
   if (!S.fwFile) return;
   var file = S.fwFile;
   confirmDialog(t("sys.fwTitle"), t("sys.fwHint") + "<br><br><b>" + esc(file.name) + "</b>", function () {
+    var started = Date.now();
     var fd = new FormData();
     fd.append("put_file", file, file.name);
     showWaitDialog(t("dlg.upgradeBody"));
     fetch(CGI + "put_file.cgi", { method: "POST", body: fd, credentials: "same-origin" })
       .catch(function () { /* the router may reboot before answering */ })
-      .then(function () { return waitForRouter(180); })
+      .then(function () {
+        var left = Math.max(15, 120 - Math.round((Date.now() - started) / 1000));
+        return waitForRouter(left);
+      })
       .then(function (ok) {
         if (ok) { toast(t("dlg.upgradeDone"), "ok"); setTimeout(function () { location.href = "/index.htm"; }, 1200); }
-        else { showWaitError(t("dlg.upgradeFail")); }
+        else { showReconnectPrompt(); }
       })
       .catch(function () { showWaitError(t("dlg.upgradeFail")); });
     return false;
@@ -1114,7 +1240,12 @@ var MON = {
   },
   iface: "wan",
   last: null,
-  timer: null
+  timer: null,
+  devLast: null,
+  devAt: 0,
+  devTimer: null,
+  devRows: [],
+  devSort: { key: "ip", dir: 1 }
 };
 
 function monPush(arr, v) {
@@ -1244,6 +1375,95 @@ function drawMonitor() {
   if ($("monTxDot")) $("monTxDot").style.background = accent;
   $("monRxNow").textContent = tr.rx.length ? fmtRate(tr.rx[tr.rx.length - 1]) : "--";
   $("monTxNow").textContent = tr.tx.length ? fmtRate(tr.tx[tr.tx.length - 1]) : "--";
+  if ($("monTrafficSub")) {
+    var rxTotal = MON.last ? MON.last[MON.iface + "_rx"] : null;
+    var txTotal = MON.last ? MON.last[MON.iface + "_tx"] : null;
+    $("monTrafficSub").textContent = t("mon.trafficTotal")
+      .replace("{rx}", rxTotal == null ? "—" : fmtKb(rxTotal))
+      .replace("{tx}", txTotal == null ? "—" : fmtKb(txTotal));
+  }
+}
+
+function fmtPps(v) {
+  if (v == null) return "—";
+  return v >= 100 ? String(Math.round(v)) : v.toFixed(1);
+}
+
+function sortDevRows(rows) {
+  var key = MON.devSort.key, dir = MON.devSort.dir;
+  return rows.slice().sort(function (a, b) {
+    if (key === "ip") {
+      var ai = ipValue(a.ip), bi = ipValue(b.ip);
+      if (ai < 0 && bi < 0) return 0;
+      if (ai < 0) return 1;
+      if (bi < 0) return -1;
+      return (ai - bi) * dir;
+    }
+    if (key === "mac") return String(a.mac).localeCompare(String(b.mac)) * dir;
+    var av = a[key], bv = b[key];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return (av - bv) * dir;
+  });
+}
+
+function updateDevSortHeaders() {
+  all("#monDevTable thead th[data-sort]").forEach(function (th) {
+    var on = th.getAttribute("data-sort") === MON.devSort.key;
+    th.classList.toggle("sort-asc", on && MON.devSort.dir === 1);
+    th.classList.toggle("sort-desc", on && MON.devSort.dir === -1);
+  });
+}
+
+function renderDevTraffic(rows) {
+  var tb = $("monDevTbody");
+  if (!tb) return;
+  MON.devRows = rows;
+  if (!rows.length) {
+    tb.innerHTML = '<tr><td colspan="7"><div class="empty"><span>' + esc(t("mon.noDevices")) + "</span></div></td></tr>";
+    updateDevSortHeaders();
+    return;
+  }
+  tb.innerHTML = sortDevRows(rows).map(function (r) {
+    return "<tr><td class='mono'>" + esc(r.ip || "—") + "</td><td class='mono'>" + esc(r.mac) +
+      "</td><td>" + esc(r.rate ? r.rate + " Mbps" : "—") +
+      "</td><td>" + fmtPps(r.txPps) + "</td><td>" + fmtPps(r.rxPps) +
+      "</td><td>" + r.tx + "</td><td>" + r.rx + "</td></tr>";
+  }).join("");
+  updateDevSortHeaders();
+}
+
+function sampleDevices() {
+  return Promise.all([
+    get("wireless_ASSOCIATE_HOST_show.cgi").catch(function () { return null; }),
+    get("dhcp_client_show.cgi").catch(function () { return []; })
+  ]).then(function (r) {
+    var hosts = (r[0] && r[0].sec_ap0) || [];
+    var leases = Array.isArray(r[1]) ? r[1] : [];
+    var ipByMac = {};
+    leases.forEach(function (l) {
+      if (l && l.mac) ipByMac[String(l.mac).toUpperCase()] = l.ip || "";
+    });
+    var now = Date.now();
+    var dt = MON.devAt ? Math.max(0.5, (now - MON.devAt) / 1000) : 0;
+    var prev = MON.devLast || {};
+    var next = {};
+    var rows = hosts.map(function (h) {
+      var mac = String(h.wl_AH_mac || "").toUpperCase();
+      var tx = num(h.wl_AH_tx_pack), rx = num(h.wl_AH_rx_pack);
+      var p = prev[mac];
+      next[mac] = { tx: tx, rx: rx };
+      return {
+        ip: ipByMac[mac] || "", mac: mac, rate: num(h.wl_AH_rate), tx: tx, rx: rx,
+        txPps: p && dt ? Math.max(0, (tx - p.tx) / dt) : null,
+        rxPps: p && dt ? Math.max(0, (rx - p.rx) / dt) : null
+      };
+    });
+    MON.devLast = next;
+    MON.devAt = now;
+    renderDevTraffic(rows);
+  }).catch(function () { });
 }
 
 function sampleMonitor() {
@@ -1260,6 +1480,17 @@ function sampleMonitor() {
       monPush(MON.mem, memPct);
       $("monCpuNow").textContent = cpuPct.toFixed(1) + "%";
       $("monMemNow").textContent = Math.round(memPct) + "%";
+      var used = Math.max(0, total - free);
+      var avg = MON.cpu.length ? MON.cpu.reduce(function (a, b) { return a + b; }, 0) / MON.cpu.length : cpuPct;
+      var freeText = free < 1024 ? Math.round(free) + " KB" : fmtKb(free);
+      if ($("monMemSub")) {
+        $("monMemSub").textContent = t("mon.memDetail")
+          .replace("{free}", freeText).replace("{used}", fmtKb(used)).replace("{total}", fmtKb(total));
+      }
+      if ($("monCpuSub")) {
+        $("monCpuSub").textContent = t("mon.cpuDetail")
+          .replace("{up}", fmtUptime(misc)).replace("{avg}", avg.toFixed(1));
+      }
     }
     if (st && st.wan_rx_bytes !== undefined) {
       var now = Date.now();
@@ -1284,14 +1515,21 @@ function sampleMonitor() {
 function startMonitor() {
   stopMonitor();
   MON.last = null;
+  MON.devLast = null;
+  MON.devAt = 0;
   sampleMonitor();
+  sampleDevices();
   MON.timer = setInterval(function () {
     if (!document.hidden) sampleMonitor();
   }, 2000);
+  MON.devTimer = setInterval(function () {
+    if (!document.hidden) sampleDevices();
+  }, 5000);
 }
 
 function stopMonitor() {
   if (MON.timer) { clearInterval(MON.timer); MON.timer = null; }
+  if (MON.devTimer) { clearInterval(MON.devTimer); MON.devTimer = null; }
 }
 
 function loadMonitor() {
@@ -1449,7 +1687,7 @@ function addAclRule() {
 
   if (kind === "mac") {
     body.innerHTML = '<div class="field"><label>' + esc(t("sec.descr")) + '</label><input type="text" id="aclName" maxlength="30"></div>' +
-      '<div class="field"><label>' + esc(t("clients.mac")) + '</label><div class="input-with-sel"><input type="text" id="aclMac" maxlength="17" placeholder="00:11:22:33:44:55"><span class="devsel-slot" data-target="aclMac" data-kind="mac"></span></div></div>' + ruleSelect;
+      '<div class="field"><label>' + esc(t("clients.mac")) + '</label><div class="input-with-sel"><input type="text" id="aclMac" maxlength="17" placeholder="00:11:22:33:44:55" data-mac="1"><span class="devsel-slot" data-target="aclMac" data-kind="mac"></span></div></div>' + ruleSelect;
   } else if (kind === "ip") {
     body.innerHTML = '<div class="field"><label>' + esc(t("sec.descr")) + '</label><input type="text" id="aclName" maxlength="30"></div>' +
       '<div class="field"><label>' + esc(t("clients.ip")) + '</label><div class="input-with-sel"><input type="text" id="aclIp" maxlength="15" placeholder="192.168.0.50"><span class="devsel-slot" data-target="aclIp" data-kind="ip"></span></div></div>' +
@@ -1471,7 +1709,7 @@ function addAclRule() {
           var rule = $("aclRule").value;
           var params;
           if (kind === "mac") {
-            var mac = $("aclMac").value.trim();
+            var mac = macValue("aclMac");
             if (!/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)) { toast(t("err.err_mac"), "err"); return false; }
             params = Object.assign({ mac_describe: $("aclName").value.trim(), rule: rule, mac_address: mac, mac_allow_deny: "0" }, aclScheduleValues());
             apply("filter_mac_add.cgi", params, { msg: t("sec.added"), after: function () { refreshAclSoon(); } });
@@ -1699,7 +1937,7 @@ function addWlAcl() {
   var body = document.createElement("div");
   body.innerHTML =
     '<div class="field"><label>' + esc(t("sec.descr")) + '</label><input type="text" id="wlAclName" maxlength="30"></div>' +
-    '<div class="field"><label>' + esc(t("clients.mac")) + '</label><div class="input-with-sel"><input type="text" id="wlAclMac" maxlength="17" placeholder="00:11:22:33:44:55"><span class="devsel-slot" data-target="wlAclMac" data-kind="mac"></span></div></div>';
+    '<div class="field"><label>' + esc(t("clients.mac")) + '</label><div class="input-with-sel"><input type="text" id="wlAclMac" maxlength="17" placeholder="00:11:22:33:44:55" data-mac="1"><span class="devsel-slot" data-target="wlAclMac" data-kind="mac"></span></div></div>';
   fillDeviceSlots(body);
   dialog({
     title: t("sec.addRule"), body: body,
@@ -1707,7 +1945,7 @@ function addWlAcl() {
       { label: t("common.cancel") },
       {
         label: t("common.save"), primary: true, onClick: function () {
-          var mac = $("wlAclMac").value.trim();
+          var mac = macValue("wlAclMac");
           if (!/^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$/.test(mac)) { toast(t("err.err_mac"), "err"); return false; }
           apply("wire_filter_mac_add.cgi", { comment: $("wlAclName").value.trim(), mac_address: mac },
             { msg: t("sec.added"), after: refreshWlAclSoon });
@@ -1804,7 +2042,7 @@ function refreshPtSoon() {
 function renderPortTriggers() {
   var tb = $("ptTbody");
   if (!PT.length) {
-    tb.innerHTML = '<tr><td colspan="4"><div class="empty"><span>' + esc(t("pt.empty")) + "</span></div></td></tr>";
+    tb.innerHTML = '<tr><td colspan="4"><div class="empty"><svg class="ic"><use href="#i-swap_horiz"/></svg><span>' + esc(t("pt.empty")) + "</span></div></td></tr>";
     return;
   }
   tb.innerHTML = PT.map(function (x) {
@@ -1930,6 +2168,7 @@ function fillDeviceSlots(root) {
     Array.prototype.forEach.call(slots, function (slot) {
       var kind = slot.getAttribute("data-kind") || "ip";
       var target = slot.getAttribute("data-target");
+      var fillIp = slot.getAttribute("data-fill-ip") || "";
       var opts = ['<option value="">' + esc(t("dev.pick")) + "</option>"];
       S.devices.forEach(function (d) {
         var v = kind === "ip" ? d.ip : d.mac;
@@ -1938,7 +2177,7 @@ function fillDeviceSlots(root) {
         opts.push('<option value="' + esc(v) + '">' + esc(label) + "</option>");
       });
       slot.innerHTML = '<button type="button" class="iconbtn devpick" data-target="' + esc(target) + '" data-kind="' + esc(kind) +
-        '" title="' + esc(t("dev.pick")) + '"><svg class="ic sm"><use href="#i-devices"/></svg></button>';
+        '" data-fill-ip="' + esc(fillIp) + '" title="' + esc(t("dev.pick")) + '"><svg class="ic sm"><use href="#i-devices"/></svg></button>';
     });
   });
 }
@@ -1948,7 +2187,7 @@ function closeDevicePicker() {
   if (p) p.parentNode.removeChild(p);
 }
 
-function openDevicePicker(target, kind, anchor) {
+function openDevicePicker(target, kind, anchor, fillIp) {
   loadDevices(true).then(function () {
     closeDevicePicker();
     var list = S.devices.filter(function (d) { return kind === "ip" ? !!d.ip : !!d.mac; });
@@ -1961,7 +2200,8 @@ function openDevicePicker(target, kind, anchor) {
       pop.innerHTML = list.map(function (d) {
         var v = kind === "ip" ? d.ip : d.mac;
         var sub = kind === "ip" ? d.mac : (d.ip || "");
-        return '<button type="button" class="devrow" data-val="' + esc(v) + '"><span class="mono">' + esc(v) +
+        return '<button type="button" class="devrow" data-val="' + esc(v) + '" data-mac="' + esc(d.mac || "") +
+          '" data-ip="' + esc(d.ip || "") + '"><span class="mono">' + esc(v) +
           '</span><span class="muted small">' + esc(sub) + "</span></button>";
       }).join("");
     }
@@ -1978,6 +2218,10 @@ function openDevicePicker(target, kind, anchor) {
       row.addEventListener("click", function () {
         var input = $(target);
         if (input) input.value = row.getAttribute("data-val");
+        if (fillIp) {
+          var ipEl = $(fillIp);
+          if (ipEl) ipEl.value = row.getAttribute("data-ip") || "";
+        }
         closeDevicePicker();
       });
     });
@@ -2032,12 +2276,23 @@ function bind() {
   });
 
   $("wlRegion").addEventListener("change", function () {
-    fillChannels($("wlChanSel"), this.value, 0);
+    refreshWlChannels(0);
   });
   $("wlWidth").addEventListener("change", function () {
-    fillChannels($("wlChanSel"), $("wlRegion").value, $("wlChanSel").value);
+    refreshWlChannels();
+    syncWlFields();
   });
+  $("wlSideBand").addEventListener("change", function () {
+    refreshWlChannels();
+  });
+  $("wlBandSel").addEventListener("change", function () {
+    refreshWlChannels();
+    syncWlFields();
+  });
+  $("wlEn").addEventListener("change", syncWlFields);
   $("secMode").addEventListener("change", updateSecFields);
+  $("wepKeyLen").addEventListener("change", updateWepFields);
+  $("wepKeyFmt").addEventListener("change", updateWepFields);
   $("dhcpDnsMode").addEventListener("change", toggleDnsRow);
 
   $("wlSaveBtn").addEventListener("click", saveWirelessBasic);
@@ -2054,6 +2309,14 @@ function bind() {
   });
   $("surveyBtn").addEventListener("click", function () { loadSurvey(true); });
   $("hostsRefreshBtn").addEventListener("click", loadHosts);
+  $("wlHostsTable").addEventListener("click", function (e) {
+    var th = e.target.closest("th[data-wl-sort]");
+    if (!th) return;
+    var key = th.getAttribute("data-wl-sort");
+    if (WL_HOST_SORT.key === key) WL_HOST_SORT.dir = -WL_HOST_SORT.dir;
+    else WL_HOST_SORT = { key: key, dir: (key === "ip" || key === "mac" || key === "mode" || key === "pows") ? 1 : -1 };
+    renderHosts(S.data.hosts || []);
+  });
   $("advSaveBtn").addEventListener("click", saveAdvanced);
 
   $("wanSaveBtn").addEventListener("click", saveWan);
@@ -2065,16 +2328,20 @@ function bind() {
   $("macCloneBtn").addEventListener("click", function () {
     var mac = (S.data.wanCfg || {}).mac_clone || "";
     if (!mac) { toast(t("err.err_mac"), "err"); return; }
-    $("macInput").value = mac;
+    $("macInput").value = formatMac(mac);
   });
   $("macDefaultBtn").addEventListener("click", function () {
     var mac = (S.data.wanCfg || {}).mac_default || $("macDefault").textContent;
-    $("macInput").value = String(mac).replace(/[^0-9a-fA-F:]/g, "");
+    $("macInput").value = formatMac(String(mac).replace(/[^0-9a-fA-F:]/g, ""));
   });
 
   $("lanSaveBtn").addEventListener("click", saveLan);
   $("dhcpSaveBtn").addEventListener("click", saveDhcp);
   $("leaseRefreshBtn").addEventListener("click", loadLan);
+  $("leaseTbody").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-bindmac]");
+    if (b) bindLease(b.getAttribute("data-bindmac"), b.getAttribute("data-bindip"));
+  });
 
   $("wispScanBtn").addEventListener("click", wispScan);
   $("wispRefreshBtn").addEventListener("click", loadWisp);
@@ -2148,7 +2415,6 @@ function bind() {
   $("fwPickBtn").addEventListener("click", function () { $("fwFile").click(); });
   $("fwFile").addEventListener("change", function () { firmwarePicked(this.files && this.files[0]); });
   $("fwUpgradeBtn").addEventListener("click", upgradeFirmware);
-  $("offlineRetry").addEventListener("click", retryOffline);
   $("rebootBtn").addEventListener("click", rebootRouter);
   $("resetBtn").addEventListener("click", factoryReset);
   $("clientsRefreshBtn").addEventListener("click", loadClients);
@@ -2161,11 +2427,31 @@ function bind() {
     drawMonitor();
   });
 
+  $("monDevTable").addEventListener("click", function (e) {
+    var th = e.target.closest("th[data-sort]");
+    if (!th) return;
+    var key = th.getAttribute("data-sort");
+    if (MON.devSort.key === key) MON.devSort.dir = -MON.devSort.dir;
+    else MON.devSort = { key: key, dir: key === "ip" || key === "mac" ? 1 : -1 };
+    renderDevTraffic(MON.devRows || []);
+  });
+
+  document.addEventListener("focusout", function (e) {
+    var el = e.target;
+    if (el && el.tagName === "INPUT" && el.hasAttribute("data-mac")) el.value = formatMac(el.value);
+  });
+  document.addEventListener("paste", function (e) {
+    var el = e.target;
+    if (el && el.tagName === "INPUT" && el.hasAttribute("data-mac")) {
+      setTimeout(function () { el.value = formatMac(el.value); }, 0);
+    }
+  });
+
   document.addEventListener("click", function (e) {
     var b = e.target && e.target.closest ? e.target.closest(".devpick") : null;
     if (b) {
       e.preventDefault();
-      openDevicePicker(b.getAttribute("data-target"), b.getAttribute("data-kind"), b);
+      openDevicePicker(b.getAttribute("data-target"), b.getAttribute("data-kind"), b, b.getAttribute("data-fill-ip"));
       return;
     }
     if (!(e.target && e.target.closest && e.target.closest("#devpop"))) closeDevicePicker();
@@ -2206,10 +2492,7 @@ function boot() {
   showMask(t("common.loading"));
   loadMode().catch(function () { }).then(function () { switchPage(initial); });
   // safety: never leave the boot mask up if a request hangs
-  setTimeout(function () {
-    hideMask(0);
-    if (!(S.data.iface && (S.data.iface.lan_ip || S.data.iface.version))) showOffline();
-  }, 12000);
+  setTimeout(function () { hideMask(0); }, 12000);
 
   setInterval(function () {
     if (S.page === "status" && !document.hidden) loadStatus();

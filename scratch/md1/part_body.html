@@ -188,7 +188,7 @@
       <div class="card">
         <div class="card-head">
           <span class="card-icon"><svg class="ic"><use href="#i-speed"/></svg></span>
-          <div><div class="card-title" data-i18n="mon.cpu">CPU load</div><div class="card-sub" data-i18n="mon.window">Last 3 minutes</div></div>
+          <div><div class="card-title" data-i18n="mon.cpu">CPU load</div><div class="card-sub" id="monCpuSub" data-i18n="mon.window">Last 3 minutes</div></div>
           <div class="spacer"></div>
           <span class="chip primary" id="monCpuNow">--</span>
         </div>
@@ -198,7 +198,7 @@
       <div class="card">
         <div class="card-head">
           <span class="card-icon"><svg class="ic"><use href="#i-memory"/></svg></span>
-          <div><div class="card-title" data-i18n="mon.memory">Memory usage</div><div class="card-sub" data-i18n="mon.window">Last 3 minutes</div></div>
+          <div><div class="card-title" data-i18n="mon.memory">Memory usage</div><div class="card-sub" id="monMemSub" data-i18n="mon.window">Last 3 minutes</div></div>
           <div class="spacer"></div>
           <span class="chip primary" id="monMemNow">--</span>
         </div>
@@ -209,7 +209,7 @@
     <div class="card mt">
       <div class="card-head">
         <span class="card-icon"><svg class="ic"><use href="#i-swap_horiz"/></svg></span>
-        <div><div class="card-title" data-i18n="mon.traffic">Network traffic</div><div class="card-sub" data-i18n="mon.trafficSub">Sampled every 2 s</div></div>
+        <div><div class="card-title" data-i18n="mon.traffic">Network traffic</div><div class="card-sub" id="monTrafficSub" data-i18n="mon.trafficSub">Total traffic</div></div>
       </div>
       <div class="card-body">
         <div class="pills" id="monPills">
@@ -221,6 +221,29 @@
         <div class="legend">
           <span class="lg-item"><i class="lg-dot" id="monRxDot"></i><span data-i18n="traffic.rx">Received</span><b id="monRxNow">--</b></span>
           <span class="lg-item"><i class="lg-dot" id="monTxDot"></i><span data-i18n="traffic.tx">Sent</span><b id="monTxNow">--</b></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-people"/></svg></span>
+        <div><div class="card-title" data-i18n="mon.devices">Wireless device traffic</div></div>
+      </div>
+      <div class="card-body tight">
+        <div class="table-wrap">
+          <table class="md" id="monDevTable">
+            <thead><tr>
+              <th class="sortable" data-sort="ip" data-i18n="clients.ip">IP</th>
+              <th class="sortable" data-sort="mac" data-i18n="clients.mac">MAC</th>
+              <th class="sortable" data-sort="rate" data-i18n="wl.rate">Rate</th>
+              <th class="sortable" data-sort="txPps" data-i18n="mon.txPps">Tx pkt/s</th>
+              <th class="sortable" data-sort="rxPps" data-i18n="mon.rxPps">Rx pkt/s</th>
+              <th class="sortable" data-sort="tx" data-i18n="wl.txPackets">Tx packets</th>
+              <th class="sortable" data-sort="rx" data-i18n="wl.rxPackets">Rx packets</th>
+            </tr></thead>
+            <tbody id="monDevTbody"><tr><td colspan="7"><div class="empty"><span data-i18n="common.loading">Loading…</span></div></td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -244,11 +267,25 @@
           <span class="card-icon"><svg class="ic"><use href="#i-wifi"/></svg></span>
           <div><div class="card-title" data-i18n="wl.basicTitle">Radio & SSID</div><div class="card-sub" data-i18n="wl.basicSub">2.4 GHz · 802.11 b/g/n</div></div>
           <div class="spacer"></div>
+          <label class="switch" style="margin-right:20px"><input type="checkbox" id="wlBroad"><span class="track"></span><span class="small" data-i18n="wl.broadcast">SSID broadcast</span></label>
           <label class="switch"><input type="checkbox" id="wlEn"><span class="track"></span><span class="small" data-i18n="wl.radio">Radio</span></label>
         </div>
         <div class="card-body">
           <div class="field-row">
             <div class="field"><label data-i18n="wl.ssid">SSID</label><input type="text" id="wlSsidInput" maxlength="32" autocomplete="off"></div>
+            <div class="field"><label data-i18n="wl.mac">MAC address</label><input type="text" id="wlMac" maxlength="17" class="mono" autocomplete="off" spellcheck="false" data-mac="1"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wl.band">Wireless mode</label>
+              <select id="wlBandSel">
+                <option value="0">802.11b</option>
+                <option value="1">802.11g</option>
+                <option value="7">802.11n</option>
+                <option value="2">802.11b+g</option>
+                <option value="9">802.11g+n</option>
+                <option value="10">802.11b+g+n</option>
+              </select>
+            </div>
             <div class="field"><label data-i18n="wl.workMode">Mode</label>
               <select id="wlModeSel">
                 <option value="0" data-i18n="wl.modeAp">Access Point (AP)</option>
@@ -256,6 +293,20 @@
                 <option value="4" data-i18n="wl.modeRepeater">Repeater</option>
                 <option value="2" data-i18n="wl.modeWds">WDS</option>
                 <option value="3" data-i18n="wl.modeApWds">AP + WDS</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wl.width">Channel width</label>
+              <select id="wlWidth">
+                <option value="0">20 MHz</option>
+                <option value="1">40 MHz</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n="wl.sideBand">Control sideband</label>
+              <select id="wlSideBand">
+                <option value="1" data-i18n="wl.sideLower">Lower</option>
+                <option value="0" data-i18n="wl.sideUpper">Upper</option>
               </select>
             </div>
           </div>
@@ -271,27 +322,6 @@
               </select>
             </div>
             <div class="field"><label data-i18n="wl.channel">Channel</label><select id="wlChanSel"></select></div>
-            <div class="field"><label data-i18n="wl.band">Wireless mode</label>
-              <select id="wlBandSel">
-                <option value="0">802.11b</option>
-                <option value="1">802.11g</option>
-                <option value="7">802.11n</option>
-                <option value="2">802.11b+g</option>
-                <option value="9">802.11g+n</option>
-                <option value="10">802.11b+g+n</option>
-              </select>
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field"><label data-i18n="wl.width">Channel width</label>
-              <select id="wlWidth">
-                <option value="0">20 MHz</option>
-                <option value="1">40 MHz</option>
-              </select>
-            </div>
-            <div class="field"><label data-i18n="wl.broadcast">SSID broadcast</label>
-              <label class="switch" style="margin-top:10px"><input type="checkbox" id="wlBroad"><span class="track"></span></label>
-            </div>
           </div>
         </div>
         <div class="card-foot">
@@ -312,22 +342,43 @@
             <select id="secMode">
               <option value="0" data-i18n="wl.secNone">Open / None</option>
               <option value="1">WEP</option>
-              <option value="2">WPA-PSK (TKIP)</option>
-              <option value="4">WPA2-PSK (AES)</option>
-              <option value="6">WPA / WPA2 mixed</option>
+              <option value="2" data-i18n="wl.secWpa">WPA-PSK</option>
+              <option value="4" data-i18n="wl.secWpa2">WPA2-PSK</option>
+              <option value="6" data-i18n="wl.secMixed">WPA / WPA2 mixed</option>
             </select>
           </div>
-          <div class="field-row" id="secCipherRow">
-            <div class="field"><label data-i18n="wl.cipher">Cipher</label>
-              <select id="secCipher">
-                <option value="AES">AES</option>
-                <option value="TKIP">TKIP</option>
-                <option value="MIX_TKIP_AES">TKIP + AES</option>
-              </select>
+          <div id="secWpaBox">
+            <div class="field-row" id="secCipherRow">
+              <div class="field"><label data-i18n="wl.cipher">Cipher</label>
+                <select id="secCipher">
+                  <option value="AES">AES</option>
+                  <option value="TKIP">TKIP</option>
+                  <option value="MIX_TKIP_AES">TKIP + AES</option>
+                </select>
+              </div>
+              <div class="field"><label data-i18n="wl.rekey">Group rekey (s)</label><input type="text" id="secRekey" value="86400" maxlength="5"></div>
             </div>
-            <div class="field"><label data-i18n="wl.rekey">Group rekey (s)</label><input type="text" id="secRekey" value="86400" maxlength="5"></div>
+            <div class="field"><label data-i18n="wl.passphrase">Passphrase (8-63 chars)</label><input type="password" id="secKey" maxlength="64" autocomplete="new-password"></div>
           </div>
-          <div class="field"><label data-i18n="wl.passphrase">Passphrase (8-63 chars)</label><input type="password" id="secKey" maxlength="64" autocomplete="new-password"></div>
+          <div id="secWepBox" class="hidden">
+            <div class="field-row">
+              <div class="field"><label data-i18n="wl.wepKeyLen">Key length</label>
+                <select id="wepKeyLen">
+                  <option value="1" data-i18n="wl.wep64">64 bits</option>
+                  <option value="2" data-i18n="wl.wep128">128 bits</option>
+                </select>
+              </div>
+              <div class="field"><label data-i18n="wl.wepKeyMode">Key mode</label>
+                <select id="wepKeyFmt">
+                  <option value="1" data-i18n="wl.wepHex">HEX</option>
+                  <option value="0" data-i18n="wl.wepAscii">ASCII</option>
+                </select>
+              </div>
+            </div>
+            <div class="field"><label data-i18n="wl.wepKey">Key</label><input type="text" id="wepKey" maxlength="26" class="mono" autocomplete="off" spellcheck="false"></div>
+            <p class="muted small" id="wepHint" style="margin:10px 0 14px">--</p>
+            <div class="notice warn"><svg class="ic"><use href="#i-warning"/></svg><span data-i18n="wl.wepNoWps">WEP does not support WPS.</span></div>
+          </div>
         </div>
         <div class="card-foot">
           <span class="hint" data-i18n="wl.secHint">Client mode uses this profile to join the upstream AP.</span>
@@ -422,15 +473,18 @@
         </div>
         <div class="card-body tight">
           <div class="table-wrap">
-            <table class="md">
+            <table class="md" id="wlHostsTable">
               <thead><tr>
-                <th data-i18n="clients.mac">MAC</th>
-                <th data-i18n="wl.rate">Rate</th>
-                <th data-i18n="wl.mode">Mode</th>
-                <th data-i18n="wl.powersave">Power save</th>
-                <th data-i18n="wl.connected">Connected</th>
+                <th class="sortable" data-wl-sort="ip" data-i18n="clients.ip">IP</th>
+                <th class="sortable" data-wl-sort="mac" data-i18n="clients.mac">MAC</th>
+                <th class="sortable" data-wl-sort="mode" data-i18n="wl.mode">Mode</th>
+                <th class="sortable" data-wl-sort="tx" data-i18n="wl.txPackets">Tx packets</th>
+                <th class="sortable" data-wl-sort="rx" data-i18n="wl.rxPackets">Rx packets</th>
+                <th class="sortable" data-wl-sort="rate" data-i18n="wl.rate">Rate</th>
+                <th class="sortable" data-wl-sort="pows" data-i18n="wl.powersave">Power save</th>
+                <th class="sortable" data-wl-sort="etime" data-i18n="wl.expire">Expire time</th>
               </tr></thead>
-              <tbody id="hostsTbody"><tr><td colspan="5"><div class="empty"><svg class="ic"><use href="#i-people"/></svg><span data-i18n="common.loading">Loading…</span></div></td></tr></tbody>
+              <tbody id="hostsTbody"><tr><td colspan="8"><div class="empty"><svg class="ic"><use href="#i-people"/></svg><span data-i18n="common.loading">Loading…</span></div></td></tr></tbody>
             </table>
           </div>
         </div>
@@ -581,7 +635,7 @@
       <div class="card-body">
         <div class="kv"><span class="kv-key" data-i18n="wan.macCurrent">Current</span><span class="kv-val mono" id="macCurrent">--</span></div>
         <div class="kv"><span class="kv-key" data-i18n="wan.macDefault">Factory default</span><span class="kv-val mono" id="macDefault">--</span></div>
-        <div class="field mt"><label data-i18n="wan.macCustom">Custom MAC</label><input type="text" id="macInput" maxlength="17" placeholder="00:11:22:33:44:55"></div>
+        <div class="field mt"><label data-i18n="wan.macCustom">Custom MAC</label><input type="text" id="macInput" maxlength="17" placeholder="00:11:22:33:44:55" data-mac="1"></div>
       </div>
       <div class="card-foot">
         <button class="btn btn-ghost" id="macCloneBtn"><svg class="ic sm"><use href="#i-link"/></svg><span data-i18n="wan.clonePc">Clone PC MAC</span></button>
@@ -688,8 +742,8 @@
       <div class="card-body tight">
         <div class="table-wrap">
           <table class="md">
-            <thead><tr><th>#</th><th data-i18n="clients.ip">IP</th><th data-i18n="clients.mac">MAC</th><th data-i18n="clients.type">Type</th></tr></thead>
-            <tbody id="leaseTbody"><tr><td colspan="4"><div class="empty"><span data-i18n="common.loading">Loading…</span></div></td></tr></tbody>
+            <thead><tr><th>#</th><th data-i18n="clients.ip">IP</th><th data-i18n="clients.mac">MAC</th><th data-i18n="clients.type">Type</th><th data-i18n="common.actions">Actions</th></tr></thead>
+            <tbody id="leaseTbody"><tr><td colspan="5"><div class="empty"><span data-i18n="common.loading">Loading…</span></div></td></tr></tbody>
           </table>
         </div>
       </div>
@@ -719,7 +773,7 @@
         <span class="card-icon"><svg class="ic"><use href="#i-router"/></svg></span>
         <div><div class="card-title" data-i18n="route.title">Static routing</div><div class="card-sub" data-i18n="route.sub">Send a destination network through a gateway</div></div>
       </div>
-      <div class="card-body">
+      <div class="card-body tight">
         <div class="table-wrap"><table class="md">
           <thead><tr>
             <th data-i18n="route.type">Type</th>
@@ -830,7 +884,7 @@
         <span class="card-icon"><svg class="ic"><use href="#i-swap_horiz"/></svg></span>
         <div><div class="card-title" data-i18n="pt.title">Port triggering</div><div class="card-sub" data-i18n="pt.sub">Open forwarding ports after outbound traffic</div></div>
       </div>
-      <div class="card-body">
+      <div class="card-body tight">
         <div class="table-wrap"><table class="md">
           <thead><tr>
             <th data-i18n="sec.descr">Description</th>
@@ -871,7 +925,7 @@
           <div class="subpage" id="dmz-super">
             <div class="field"><label data-i18n="sec.superDmzMac">目标 MAC</label>
               <div class="input-with-sel">
-                <input type="text" id="superDmzMac" maxlength="17" placeholder="00:11:22:33:44:55">
+                <input type="text" id="superDmzMac" maxlength="17" placeholder="00:11:22:33:44:55" data-mac="1">
                 <span class="devsel-slot" data-target="superDmzMac" data-kind="mac"></span>
               </div>
             </div>
@@ -1095,7 +1149,7 @@
         <div class="card-body">
           <div class="field"><label data-i18n="sys.wolMac">Target MAC</label>
             <div class="input-with-sel">
-              <input type="text" id="wolMac" maxlength="17" placeholder="00:11:22:33:44:55">
+              <input type="text" id="wolMac" maxlength="17" placeholder="00:11:22:33:44:55" data-mac="1">
               <span class="devsel-slot" data-target="wolMac" data-kind="mac"></span>
             </div>
           </div>
@@ -1171,12 +1225,4 @@
 <div class="mask show" id="mask">
   <div class="spinner"></div>
   <div class="mask-text" id="maskText">加载中…</div>
-</div>
-<div class="offline" id="offline">
-  <div class="offline-card">
-    <div class="offline-icon"><svg class="ic"><use href="#i-warning"/></svg></div>
-    <div class="offline-title" data-i18n="sys.offlineTitle">无法连接到路由器</div>
-    <p class="offline-text" data-i18n="sys.offlineText">页面没有加载到数据。请检查电脑或手机是否已重新连接到路由器的 Wi-Fi，然后重试。</p>
-    <button class="btn btn-primary" id="offlineRetry" type="button" data-i18n="common.retry">重试</button>
-  </div>
 </div>

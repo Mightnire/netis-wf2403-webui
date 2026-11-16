@@ -271,6 +271,7 @@ main {
   border-bottom: 2px solid var(--primary);
   padding-bottom: 7px;
 }
+.field input:disabled, .field select:disabled { opacity: .5; cursor: not-allowed; }
 .field .suffix { position: absolute; right: 0; bottom: 8px; font-size: 12px; color: var(--text-3); }
 .field-row { display: flex; gap: 18px; }
 .field-row > .field { flex: 1; }
@@ -382,6 +383,10 @@ table.md th {
   padding: 10px 12px; border-bottom: 1px solid var(--divider);
   white-space: nowrap;
 }
+table.md th.sortable { cursor: pointer; user-select: none; }
+table.md th.sortable:hover { color: var(--text); }
+table.md th.sort-asc::after { content: " ▲"; font-size: 9px; }
+table.md th.sort-desc::after { content: " ▼"; font-size: 9px; }
 table.md td {
   padding: 11px 12px; border-bottom: 1px solid var(--divider);
   color: var(--text); vertical-align: middle;
@@ -467,28 +472,6 @@ table.md td.actions { text-align: right; white-space: nowrap; }
 .dialog-head { padding: 20px 22px 6px; font-size: 17px; font-weight: 500; }
 .dialog-body { padding: 6px 22px 18px; overflow-y: auto; color: var(--text); font-size: 14px; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 6px; padding: 8px 12px 12px; }
-
-/* ---------- Offline / reconnect prompt ---------- */
-.offline {
-  position: fixed; inset: 0; z-index: 200;
-  display: none; align-items: center; justify-content: center;
-  padding: 24px; background: var(--bg);
-}
-.offline.show { display: flex; }
-.offline-card {
-  width: min(420px, 100%); text-align: center;
-  background: var(--surface); border: 1px solid var(--divider);
-  border-radius: var(--radius); box-shadow: var(--e2);
-  padding: 32px 26px 26px;
-}
-.offline-icon {
-  width: 64px; height: 64px; margin: 0 auto 16px;
-  display: grid; place-items: center; border-radius: 50%;
-  background: var(--primary-tint); color: var(--primary);
-}
-.offline-icon .ic { width: 32px; height: 32px; }
-.offline-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
-.offline-text { color: var(--text-2); font-size: 13px; line-height: 1.6; margin: 0 0 20px; }
 
 /* ---------- Busy mask ---------- */
 .mask {

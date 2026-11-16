@@ -35,6 +35,18 @@ function esc(v) {
 
 function num(v, d) { var n = parseFloat(v); return isFinite(n) ? n : (d || 0); }
 
+function ipValue(ip) {
+  var p = String(ip || "").split(".");
+  if (p.length !== 4) return -1;
+  var n = 0;
+  for (var i = 0; i < 4; i++) {
+    var x = parseInt(p[i], 10);
+    if (!isFinite(x) || x < 0 || x > 255) return -1;
+    n = n * 256 + x;
+  }
+  return n;
+}
+
 function pad2(n) { return n < 10 ? "0" + n : "" + n; }
 
 function fmtUptime(misc) {
@@ -80,31 +92,6 @@ function hideMask(delay) {
   }, delay == null ? 200 : delay);
 }
 
-/* ---------- offline / reconnect ---------- */
-var offlineTimer = null;
-function showOffline() {
-  var el = $("offline");
-  if (!el) return;
-  el.classList.add("show");
-  if (!offlineTimer) {
-    offlineTimer = setInterval(function () {
-      post("topstatus_interface_parame_show.cgi", { noneed: "noneed" }).then(function (d) {
-        if (d && (d.lan_ip || d.version)) { hideOffline(); location.reload(); }
-      }).catch(function () { });
-    }, 6000);
-  }
-}
-function hideOffline() {
-  var el = $("offline");
-  if (el) el.classList.remove("show");
-  clearInterval(offlineTimer);
-  offlineTimer = null;
-}
-function retryOffline() {
-  hideOffline();
-  location.reload();
-}
-
 /* Keep browsers and password managers from auto-filling router fields. */
 function hardenInputs(root) {
   all("input", root || document).forEach(function (inp) {
@@ -117,6 +104,26 @@ function hardenInputs(root) {
     inp.setAttribute("data-lpignore", "true");
     inp.setAttribute("data-1p-ignore", "true");
   });
+}
+
+/* Accept 08:10:76:59:56:21, 08-10-76-59-56-21 or 081076595621
+   and always submit the colon-separated uppercase form. */
+function normalizeMac(value) {
+  var hex = String(value == null ? "" : value).replace(/[^0-9a-fA-F]/g, "");
+  return hex.length === 12 ? hex.toUpperCase() : "";
+}
+
+function formatMac(value) {
+  var hex = normalizeMac(value);
+  if (!hex) return String(value == null ? "" : value).trim();
+  return hex.match(/.{2}/g).join(":");
+}
+
+function macValue(id) {
+  var el = $(id);
+  if (!el) return "";
+  el.value = formatMac(el.value);
+  return el.value;
 }
 
 /* ---------- toast ---------- */
@@ -276,8 +283,18 @@ function showWaitDialog(text) {
 
 function showWaitError(text) {
   $("dialogTitle").textContent = t("dlg.rebootTitle");
-  $("dialogBody").innerHTML = '<div class="row" style="gap:12px"><svg class="ic" style="color:var(--danger)"><use href="#i-warning"/></svg><span id="waitText">' + esc(text) + "</span></div>";
+  $("dialogBody").innerHTML = '<div class="row" style="gap:12px"><svg class="ic" style="color:var(--err)"><use href="#i-warning"/></svg><span id="waitText">' + esc(text) + "</span></div>";
   $("dialogActions").innerHTML = '<button class="btn btn-primary" onclick="closeDialog()">' + esc(t("common.close")) + "</button>";
+  $("scrim").classList.add("show");
+}
+
+function showReconnectPrompt() {
+  var host = location.host || "192.168.0.1";
+  $("dialogTitle").textContent = t("dlg.reconnectTitle");
+  $("dialogBody").innerHTML = '<div class="row" style="gap:12px;align-items:flex-start"><svg class="ic" style="color:var(--warn);flex:none"><use href="#i-warning"/></svg><span>' + esc(t("dlg.reconnectBody").replace("{host}", host)) + "</span></div>";
+  $("dialogActions").innerHTML =
+    '<button class="btn btn-ghost" onclick="closeDialog()">' + esc(t("common.close")) + "</button>" +
+    '<button class="btn btn-primary" onclick="location.href=\'/index.htm\'">' + esc(t("common.retry")) + "</button>";
   $("scrim").classList.add("show");
 }
 
@@ -523,9 +540,6 @@ function loadStatus() {
   ];
   return Promise.all(jobs.map(function (p) { return p.catch(function () { return null; }); }))
     .then(function (r) {
-      var any = !!(r[1] && (r[1].lan_ip || r[1].version)) ||
-                !!(r[0] && typeof r[0] === "object" && Object.keys(r[0]).length);
-      if (any) hideOffline(); else showOffline();
       S.data.misc = r[0];
       S.data.iface = r[1];
       S.data.stats = r[2];
@@ -695,13 +709,13 @@ function renderClients() {
     return {
       ip: l.ip, mac: l.mac,
       iface: h ? t("clients.wireless") : "LAN",
-      link: h ? (num(h.wl_AH_rate) / 2) + " Mbps" : "—",
+      link: h ? num(h.wl_AH_rate) + " Mbps" : "—",
       signal: h ? "—" : "—"
     };
   });
   if (!rows.length && hosts.length) {
     rows = hosts.map(function (h) {
-      return { ip: "—", mac: h.wl_AH_mac, iface: t("clients.wireless"), link: (num(h.wl_AH_rate) / 2) + " Mbps", signal: "—" };
+      return { ip: "—", mac: h.wl_AH_mac, iface: t("clients.wireless"), link: num(h.wl_AH_rate) + " Mbps", signal: "—" };
     });
   }
   if (!rows.length) {
@@ -720,13 +734,47 @@ function renderLeases(leases) {
   leases = leases || [];
   $("leaseSub").textContent = leases.length + (S.lang === "zh" ? " 条记录" : " entries");
   if (!leases.length) {
-    tb.innerHTML = '<tr><td colspan="4"><div class="empty"><span>' + esc(t("common.none")) + "</span></div></td></tr>";
+    tb.innerHTML = '<tr><td colspan="5"><div class="empty"><span>' + esc(t("common.none")) + "</span></div></td></tr>";
     return;
   }
   tb.innerHTML = leases.map(function (l) {
+    var canBind = l.status !== "Static";
     return "<tr><td>" + esc(l.id) + "</td><td class='mono'>" + esc(l.ip) + "</td><td class='mono'>" + esc(l.mac) +
-      "</td><td>" + esc(l.status === "Dynamic" ? (S.lang === "zh" ? "动态" : "Dynamic") : l.status) + "</td></tr>";
+      "</td><td>" + esc(l.status === "Dynamic" ? (S.lang === "zh" ? "动态" : "Dynamic") : l.status) + "</td>" +
+      "<td class='actions'>" + (canBind ? '<button class="iconbtn" data-bindmac="' + esc(l.mac) + '" data-bindip="' + esc(l.ip) +
+        '" title="' + esc(t("lan.bindNow")) + '"><svg class="ic sm"><use href="#i-add"/></svg></button>' : "") + "</td></tr>";
   }).join("");
+}
+
+var WL_HOST_SORT = { key: "ip", dir: 1 };
+
+function sortHostRows(rows) {
+  var key = WL_HOST_SORT.key, dir = WL_HOST_SORT.dir;
+  return rows.slice().sort(function (a, b) {
+    if (key === "ip") {
+      var ai = ipValue(a.ip), bi = ipValue(b.ip);
+      if (ai < 0 && bi < 0) return 0;
+      if (ai < 0) return 1;
+      if (bi < 0) return -1;
+      return (ai - bi) * dir;
+    }
+    if (key === "mac" || key === "mode" || key === "pows") {
+      return String(a[key] || "").localeCompare(String(b[key] || "")) * dir;
+    }
+    var av = a[key], bv = b[key];
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    return (av - bv) * dir;
+  });
+}
+
+function updateHostSortHeaders() {
+  all("#wlHostsTable thead th[data-wl-sort]").forEach(function (th) {
+    var on = th.getAttribute("data-wl-sort") === WL_HOST_SORT.key;
+    th.classList.toggle("sort-asc", on && WL_HOST_SORT.dir === 1);
+    th.classList.toggle("sort-desc", on && WL_HOST_SORT.dir === -1);
+  });
 }
 
 function renderHosts(hosts) {
@@ -735,14 +783,30 @@ function renderHosts(hosts) {
   hosts = hosts || [];
   $("hostsSub").textContent = hosts.length + (S.lang === "zh" ? " 台在线" : " online");
   if (!hosts.length) {
-    tb.innerHTML = '<tr><td colspan="5"><div class="empty"><svg class="ic"><use href="#i-people"/></svg><span>' + esc(t("wl.noStations")) + "</span></div></td></tr>";
+    tb.innerHTML = '<tr><td colspan="8"><div class="empty"><svg class="ic"><use href="#i-people"/></svg><span>' + esc(t("wl.noStations")) + "</span></div></td></tr>";
     return;
   }
-  tb.innerHTML = hosts.map(function (h) {
-    return "<tr><td class='mono'>" + esc(h.wl_AH_mac) + "</td><td>" + (num(h.wl_AH_rate) / 2) + " Mbps</td><td>" + esc(String(h.wl_AH_mode || "").trim()) +
-      "</td><td>" + esc(h.wl_AH_powS === "no" ? (S.lang === "zh" ? "否" : "No") : (S.lang === "zh" ? "是" : "Yes")) +
-      "</td><td>" + esc(h.wl_AH_Etime) + " s</td></tr>";
+  var ipByMac = {};
+  (S.data.leases || []).forEach(function (l) {
+    if (l && l.mac) ipByMac[String(l.mac).toUpperCase()] = l.ip || "";
+  });
+  var rows = hosts.map(function (h) {
+    var mac = String(h.wl_AH_mac || "");
+    return {
+      ip: ipByMac[mac.toUpperCase()] || "", mac: mac,
+      mode: String(h.wl_AH_mode || "").trim(),
+      tx: num(h.wl_AH_tx_pack), rx: num(h.wl_AH_rx_pack),
+      rate: num(h.wl_AH_rate), pows: String(h.wl_AH_powS || ""),
+      etime: num(h.wl_AH_Etime)
+    };
+  });
+  tb.innerHTML = sortHostRows(rows).map(function (r) {
+    return "<tr><td class='mono'>" + esc(r.ip || "—") + "</td><td class='mono'>" + esc(r.mac) +
+      "</td><td>" + esc(r.mode) + "</td><td>" + r.tx + "</td><td>" + r.rx +
+      "</td><td>" + r.rate + " Mbps</td><td>" + esc(r.pows === "no" ? (S.lang === "zh" ? "否" : "No") : (S.lang === "zh" ? "是" : "Yes")) +
+      "</td><td>" + r.etime + " s</td></tr>";
   }).join("");
+  updateHostSortHeaders();
 }
 
 /* ---------- traffic labels ---------- */
