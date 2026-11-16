@@ -127,7 +127,7 @@ PowerShell `Set-Content -Encoding UTF8` 给 `part_css.css` 写入了 UTF-8 BOM�
 
 ### 已连主机完整字段
 
-- 无线统计表补齐原厂 7 列：MAC、模式、发送包、接收包、速率、省电模式、连接时长。
+- 无线统计表在原厂 7 列基础上增加 IP 首列，共 8 列：IP、MAC、模式、发送包、接收包、速率、省电模式、过期时间。
 - 数据直接取自 `wireless_ASSOCIATE_HOST_show.cgi` 的 `wl_AH_tx_pack` / `wl_AH_rx_pack` 等字段。
 
 ### MAC 地址输入统一
@@ -151,7 +151,7 @@ PowerShell `Set-Content -Encoding UTF8` 给 `part_css.css` 写入了 UTF-8 BOM�
 
 ## 阶段 6：打包与发布
 
-- 新控制台 gzip 约 67 KB
+- 新控制台 gzip 约 72 KB
 - 原厂页面 gzip 约 86 KB
 - 固件 3,892,322 字节，双块校验通过
 - 原厂 `web_upgrade_stock.bin` 与自定义 `web_upgrade_custom.bin` 作为 Release 资产
