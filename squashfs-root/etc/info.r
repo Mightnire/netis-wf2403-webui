@@ -1,0 +1,4 @@
+
+RALINK=
+WANNAME=eth1
+RAMOD=

@@ -1,0 +1,153 @@
+#mount none /proc -t proc
+#mount tmpfs /var -t tmpfs
+
+mount -t tmpfs -o size=16m tmpfs /var
+mount -t proc proc proc
+mount -t sysfs sysfs /sys
+mount -t devpts devpts /dev/pts
+
+DIRS=" ppp/peers udhcpc udhcpd dnrd run lib/misc linuxigd tmp log net-snmp system sys"
+
+for dir in $DIRS ; do
+	mkdir -p /var/$dir
+done
+
+insmod /lib/modules/ctf.ko
+#eth0 module
+insmod /lib/modules/et.ko
+#insmod /lib/modules/bcm57xx.ko
+#
+##eth1 module wifi 2.4G interface
+insmod /lib/modules/wl.ko
+#
+##eth2 module wifi 5G interface
+##5G load in bcm_wifi_hw.c
+##insmod /lib/modules/usbcore.ko
+##insmod /lib/modules/usb-storage.ko
+##insmod /lib/modules/ehci-hcd.ko
+#
+##insmod /lib/modules/wl_high.ko instance_base=1
+#
+vconfig set_name_type VLAN_PLUS_VID_NO_PAD
+##if not set right nvram parames it will be panic
+ifconfig eth0 up
+vconfig add eth0 1
+vconfig add eth0 2
+#
+brctl addbr br0
+brctl addif br0 vlan1
+brctl addif br0 eth1
+#brctl addif br0 eth2
+#ifconfig eth1 up
+ifconfig vlan1 up
+ifconfig vlan2 up
+brctl setfd br0 0
+ifconfig br0 up
+brctl stp br0 off
+#
+##nvram set vlan2ports="4 5"
+##nvram set vlan1ports="0 1 2 3 5*"
+##insmod /lib/modules/main.ko
+##setvlan 31 0 0 0 0
+#
+#ifconfig lo 127.0.0.1
+#
+#  extact web pages
+#cd /web
+#flash extr /web
+#cd /
+
+##nvram set vlan1ports="
+##insmod /lib/modules/main.ko
+##setvlan 31 0 0 0 0
+#
+ifconfig lo 127.0.0.1
+#
+##nvram set vlan1ports="
+##insmod /lib/modules/main.ko
+##setvlan 31 0 0 0 0
+#
+#ifconfig lo 127.0.0.1
+#
+#
+#modify by wangting
+/bin/ln -s /web /var/web
+/bin/ln -s /sys /var/sys
+
+mkdir -p /var/dns
+mkdir -p /var/cmd
+mkdir -p /var/args
+
+mkdir -p /tmp/bin
+mkdir -p /tmp/bin.src
+echo "************************************ok,change PATH: /tmp/bin*****************************************************"
+export PATH=/tmp/bin:/tmp/bin.src:/usr/bin:/bin:/usr/sbin:/sbin
+#wan lan switch
+#echo 0 > /proc/wan_port
+
+echo " " > /etc/ppp/peers/rpptp
+cp /bin/pppoe.sh /var/udhcpc/eth0.deconfig
+echo " " > /var/udhcpc/eth0.deconfig
+cp /bin/pppoe.sh /var/udhcpc/eth1.deconfig
+echo " " > /var/udhcpc/eth1.deconfig
+cp /bin/pppoe.sh /var/udhcpc/br0.deconfig
+echo " " > /var/udhcpc/br0.deconfig
+cp /bin/pppoe.sh /var/udhcpc/wlan0.deconfig
+echo " " > /var/udhcpc/wlan0.deconfig
+
+cp /etc/tmp/pics* /var/linuxigd
+cp /bin/checkupfile /var/tmp/checkupfile
+cp /bin/update_main /var/tmp/update_main
+##############
+cp /bin/pppoe.sh /var/ppp/true
+echo "#!/bin/sh" > /var/ppp/true
+#echo "PASS"     >> /var/ppp/true
+
+cp /var/web/version.txt /var/tmp/version -f
+#syslog
+/bin/logd &
+echo $! >/var/run/log.pid
+#gen pin
+#sh /bin/wpspin.sh
+
+#generate pppoe session file
+#flash gen-pppoe-session-file
+led &
+#bcm_param_set.sh
+#flash bcm_wl_init 
+# Start system script
+init.sh gw all wl_init &
+
+#start wps
+#sh /bin/wpsstart.sh
+
+# start web server
+#webs&
+
+# daemon to monitor reload default and disable RF 
+#reload&
+
+igdmptd &
+
+#add port trigger
+/web/cgi-bin/cgitest.cgi port_trigger &
+
+#add ftp port
+/web/cgi-bin/cgitest.cgi ftp_port &
+
+
+#set wan lan link port
+#/web/cgi-bin/cgitest.cgi wan_lan_link_status
+# bcm wl init
+
+#snmp
+#/web/cgi-bin/cgitest.cgi snmp_init
+
+#system led
+#echo "8" > /proc/gpio
+webs&
+#
+/bin/restart_webs &
+/bin/wps_detect &
+#
+#/bin/start_daemon.sh &

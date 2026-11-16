@@ -1,0 +1,127 @@
+ifconfig lo   127.0.0.1
+mount tmpfs /var -t tmpfs
+mount none /proc -t proc
+
+DIRS=" ppp/peers udhcpc udhcpd dnrd run lib/misc linuxigd tmp log net-snmp system sys"
+
+for dir in $DIRS ; do
+	mkdir -p /var/$dir
+done
+#  extact web pages
+#cd /web
+#flash extr /web
+#cd /
+
+#modify by wangting
+/bin/ln -s /web /var/web
+/bin/ln -s /sys /var/sys
+
+mkdir -p /var/dns
+mkdir -p /var/cmd
+mkdir -p /var/args
+mkdir -p /var/control
+
+mount sys /sys -t sysfs 
+cp /etc/xml_params.mode /var/xml_params -Rf
+sh /usr/bin/rename_wan.sh
+
+#wan lan switch
+#echo 0 > /proc/wan_port
+
+echo " " > /etc/ppp/peers/rpptp
+cp /bin/pppoe.sh /var/udhcpc/eth0.deconfig
+echo " " > /var/udhcpc/eth0.deconfig
+cp /bin/pppoe.sh /var/udhcpc/eth1.deconfig
+echo " " > /var/udhcpc/eth1.deconfig
+cp /bin/pppoe.sh /var/udhcpc/br0.deconfig
+echo " " > /var/udhcpc/br0.deconfig
+cp /bin/pppoe.sh /var/udhcpc/wlan0.deconfig
+echo " " > /var/udhcpc/wlan0.deconfig
+
+cp /etc/tmp/pics* /var/linuxigd
+cp /bin/checkupfile /var/tmp/checkupfile
+cp /bin/update_main /var/tmp/update_main
+##############
+cp /bin/pppoe.sh /var/ppp/true
+echo "#!/bin/sh" > /var/ppp/true
+#echo "PASS"     >> /var/ppp/true
+
+cp /var/web/version.txt /var/tmp/version -f
+#syslog
+/bin/logd &
+echo $! >/var/run/log.pid
+
+#gen pin
+sh /bin/wpspin.sh
+#generate pppoe session file
+flash gen-pppoe-session-file
+
+#check WLAN0_WLAN_DISABLED by /proc/wifiswitch
+wlan_check.sh
+
+# Start system script
+init.sh gw all
+
+/usr/bin/init_pon.sh
+
+#start wps
+sh /bin/wpsstart.sh
+
+# start web server
+webs&
+
+# daemon to monitor reload default and disable RF 
+#reload&
+
+# modify dst-cache setting
+#set_kernel_arguments.sh
+/bin/restart_webs &
+#sh /bin/get_mac_from_pc.sh &
+
+/bin/cdrom_wizard &
+
+
+#add port trigger
+/web/cgi-bin/cgitest.cgi port_trigger
+
+#add ftp port
+/web/cgi-bin/cgitest.cgi ftp_port
+
+
+#set wan lan link port
+/web/cgi-bin/cgitest.cgi wan_lan_link_status
+
+#snmp
+/web/cgi-bin/cgitest.cgi snmp_init
+
+#system led
+####################################
+#fixme: don't have in kernel of marvell
+#echo "8" > /proc/gpio
+
+#kill oray
+/bin/restart_oray &
+
+#ntp server
+#killall ntpd
+#/bin/ntpd -c /etc/ntp.conf
+
+#wpstest
+#sh /bin/wpstest.sh
+ 
+#add superdmz
+#/bin/superdmz_init.sh
+
+/bin/wps_detect &
+
+#rxxV4
+#echo 1 > /proc/zb_disable_tty
+#sh /bin/rxx.sh
+
+#lxb@2011.05.26
+#generate_passwd.sh &
+#telnetd &
+telnetd.sh
+
+igdmptd &
+#print.sh &

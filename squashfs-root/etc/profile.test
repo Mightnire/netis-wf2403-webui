@@ -1,0 +1,35 @@
+echo 4 > /proc/vlanpid_set
+echo 6 > /proc/vlanpid_set
+iwpriv wlan0 set_mib mp_specific=1
+
+ifconfig lo   127.0.0.1
+DIRS="  run  tmp "
+
+for dir in $DIRS ; do
+	mkdir -p /var/$dir
+done
+
+mkdir -p /var/dns
+mkdir -p /var/cmd
+mkdir -p /var/args
+
+#modify by wangting
+/bin/ln -s /web /var/web
+
+cp /var/web/version.txt /var/tmp/version -f
+
+#syslog
+#/bin/logd &
+echo $! >/var/run/log.pid
+# Start system script
+init.sh gw all
+
+# start web server
+webs &
+
+#/bin/UDPserver &
+sleep 2
+cmac2 &
+
+
+

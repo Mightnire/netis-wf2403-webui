@@ -1,0 +1,1174 @@
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" id="sprite"><!--ICONS--></svg>
+
+<header class="appbar">
+  <div class="brand">
+    <img class="brand-mark" src="data:image/svg+xml;base64,__BRAND__" alt="netis">
+    <span class="brand-model">WF2403</span>
+  </div>
+  <span class="mode-chip" id="modeChip"><span class="mc-text" data-i18n="mode.router">Router</span></span>
+  <div class="spacer"></div>
+  <button class="iconbtn" id="langBtn" type="button" title="Language / 语言">
+    <svg class="ic"><use href="#i-language"/></svg>
+  </button>
+  <a class="iconbtn" href="/index_old.htm" title="Classic UI" data-i18n-title="app.classic">
+    <svg class="ic"><use href="#i-open_in_new"/></svg>
+  </a>
+</header>
+
+<nav class="tabbar" id="tabbar" role="tablist">
+  <button class="tab active" role="tab" data-page="status"><svg class="ic"><use href="#i-dashboard"/></svg><span data-i18n="nav.status">Overview</span></button>
+  <button class="tab" role="tab" data-page="monitor"><svg class="ic"><use href="#i-show_chart"/></svg><span data-i18n="nav.monitor">Monitor</span></button>
+  <button class="tab" role="tab" data-page="wireless"><svg class="ic"><use href="#i-wifi"/></svg><span data-i18n="nav.wireless">Wireless</span></button>
+  <button class="tab" role="tab" data-page="wan"><svg class="ic"><use href="#i-settings_ethernet"/></svg><span data-i18n="nav.wan">Internet</span></button>
+  <button class="tab" role="tab" data-page="lan"><svg class="ic"><use href="#i-lan"/></svg><span data-i18n="nav.lan">LAN</span></button>
+  <button class="tab" role="tab" data-page="client"><svg class="ic"><use href="#i-wifi_tethering"/></svg><span data-i18n="nav.client">Client</span></button>
+  <button class="tab" role="tab" data-page="security"><svg class="ic"><use href="#i-security"/></svg><span data-i18n="nav.security">Security</span></button>
+  <button class="tab" role="tab" data-page="system"><svg class="ic"><use href="#i-settings"/></svg><span data-i18n="nav.system">System</span></button>
+</nav>
+
+<main>
+  <!-- ====================== STATUS ====================== -->
+  <section class="page active" id="page-status" role="tabpanel">
+    <div class="mode-banner">
+      <svg class="ic"><use href="#i-router"/></svg>
+      <div class="grow">
+        <div class="mb-title" id="modeBannerTitle">Router Mode</div>
+        <div class="mb-sub" id="modeBannerSub">Wired WAN · NAT enabled</div>
+      </div>
+    </div>
+
+    <div class="grid cols-4">
+      <div class="stat" id="statWan">
+        <span class="stat-label" data-i18n="status.wanIp" id="statWanLabel">WAN IP</span>
+        <span class="stat-value mono" id="statIp">--</span>
+        <span class="stat-sub" id="statWanType">DHCP</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label" data-i18n="status.uptime">Uptime</span>
+        <span class="stat-value" id="statUptime">--</span>
+        <span class="stat-sub" data-i18n="status.sinceBoot">since last boot</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label" data-i18n="status.memory">Memory</span>
+        <span class="stat-value" id="statMem">--</span>
+        <div class="meter mt-s"><span id="statMemMeter"></span></div>
+      </div>
+      <div class="stat">
+        <span class="stat-label" data-i18n="status.clients">Clients</span>
+        <span class="stat-value" id="statClients">--</span>
+        <span class="stat-sub" data-i18n="status.onlineNow">online now</span>
+      </div>
+    </div>
+
+    <div class="grid cols-2 mt">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-router"/></svg></span>
+          <div><div class="card-title" data-i18n="status.device">Device</div><div class="card-sub" data-i18n="status.deviceSub">System information</div></div>
+        </div>
+        <div class="card-body">
+          <div class="kv"><span class="kv-key" data-i18n="status.model">Model</span><span class="kv-val">Netis WF2403</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="status.firmware">Firmware</span><span class="kv-val" id="sysFw">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="status.uptime">Uptime</span><span class="kv-val" id="sysUptime">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="status.cpu">CPU load</span><span class="kv-val"><span id="sysCpu">--</span> %</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="status.memory">Memory</span><span class="kv-val" id="sysMem">--</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-wifi"/></svg></span>
+          <div><div class="card-title" data-i18n="status.wireless">Wireless</div><div class="card-sub" data-i18n="status.wirelessSub">Radio & SSID</div></div>
+          <div class="spacer"></div>
+          <span class="chip" id="wlStateChip">--</span>
+        </div>
+        <div class="card-body">
+          <div class="kv"><span class="kv-key" data-i18n="wl.ssid">SSID</span><span class="kv-val" id="wlSsid">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wl.workMode">Mode</span><span class="kv-val" id="wlMode">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wl.channel">Channel</span><span class="kv-val" id="wlChan">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wl.security">Security</span><span class="kv-val" id="wlSec">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wl.clients">Associated</span><span class="kv-val" id="wlClients">--</span></div>
+        </div>
+      </div>
+
+      <div class="card" id="wanCard">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-settings_ethernet"/></svg></span>
+          <div><div class="card-title" data-i18n="status.wan">Internet (WAN)</div><div class="card-sub" id="wanSub">DHCP</div></div>
+          <div class="spacer"></div>
+          <span class="chip" id="wanConnChip">--</span>
+        </div>
+        <div class="card-body">
+          <div class="kv"><span class="kv-key" data-i18n="status.connType">Type</span><span class="kv-val" id="wanType">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wan.ip">IP address</span><span class="kv-val mono" id="wanIp">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wan.mask">Subnet mask</span><span class="kv-val mono" id="wanMask">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wan.gw">Gateway</span><span class="kv-val mono" id="wanGw">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wan.dns">DNS</span><span class="kv-val mono" id="wanDns">--</span></div>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-flat sm" id="wanRefreshBtn"><svg class="ic sm"><use href="#i-refresh"/></svg><span data-i18n="common.refresh">Refresh</span></button>
+          <button class="btn btn-primary sm" id="wanConnBtn"><svg class="ic sm"><use href="#i-link"/></svg><span data-i18n="wan.connect">Connect</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-lan"/></svg></span>
+          <div><div class="card-title" data-i18n="status.lan">Local network</div><div class="card-sub">LAN / DHCP</div></div>
+        </div>
+        <div class="card-body">
+          <div class="kv"><span class="kv-key" data-i18n="lan.ip">LAN IP</span><span class="kv-val mono" id="lanIp">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="lan.mask">Subnet mask</span><span class="kv-val mono" id="lanMask">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="lan.mac">LAN MAC</span><span class="kv-val mono" id="lanMac">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="lan.dhcp">DHCP server</span><span class="kv-val" id="lanDhcp">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="lan.pool">Address pool</span><span class="kv-val mono" id="lanPool">--</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-swap_horiz"/></svg></span>
+        <div><div class="card-title" data-i18n="status.traffic">Traffic</div><div class="card-sub" data-i18n="status.trafficSub">Live counters & throughput</div></div>
+        <div class="spacer"></div>
+        <span class="chip" id="trafficStamp">--</span>
+      </div>
+      <div class="card-body tight">
+        <div class="traffic">
+          <div class="t-col">
+            <h4>WAN</h4>
+            <div class="t-line"><span class="muted" data-i18n="traffic.rx">RX</span><span class="t-val down" id="tWanRx">0 B</span></div>
+            <div class="t-line"><span class="muted" data-i18n="traffic.tx">TX</span><span class="t-val up" id="tWanTx">0 B</span></div>
+            <div class="t-line"><span class="muted" data-i18n="traffic.rate">Rate</span><span class="t-val" id="tWanRate">0 B/s</span></div>
+          </div>
+          <div class="t-col">
+            <h4>LAN</h4>
+            <div class="t-line"><span class="muted" data-i18n="traffic.rx">RX</span><span class="t-val down" id="tLanRx">0 B</span></div>
+            <div class="t-line"><span class="muted" data-i18n="traffic.tx">TX</span><span class="t-val up" id="tLanTx">0 B</span></div>
+            <div class="t-line"><span class="muted" data-i18n="traffic.rate">Rate</span><span class="t-val" id="tLanRate">0 B/s</span></div>
+          </div>
+          <div class="t-col">
+            <h4>WLAN</h4>
+            <div class="t-line"><span class="muted" data-i18n="traffic.rx">RX</span><span class="t-val down" id="tWlanRx">0 B</span></div>
+            <div class="t-line"><span class="muted" data-i18n="traffic.tx">TX</span><span class="t-val up" id="tWlanTx">0 B</span></div>
+            <div class="t-line"><span class="muted" data-i18n="traffic.rate">Rate</span><span class="t-val" id="tWlanRate">0 B/s</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-devices"/></svg></span>
+        <div><div class="card-title" data-i18n="status.clientsTitle">Online clients</div><div class="card-sub" id="clientsSub">DHCP leases & wireless stations</div></div>
+        <div class="spacer"></div>
+        <button class="btn btn-flat sm" id="clientsRefreshBtn"><svg class="ic sm"><use href="#i-refresh"/></svg><span data-i18n="common.refresh">Refresh</span></button>
+      </div>
+      <div class="card-body tight">
+        <div class="table-wrap">
+          <table class="md">
+            <thead><tr>
+              <th data-i18n="clients.ip">IP</th>
+              <th data-i18n="clients.mac">MAC</th>
+              <th data-i18n="clients.iface">Interface</th>
+              <th data-i18n="clients.link">Link</th>
+              <th data-i18n="clients.signal">Signal</th>
+            </tr></thead>
+            <tbody id="clientsTbody"><tr><td colspan="5"><div class="empty"><svg class="ic"><use href="#i-devices"/></svg><span data-i18n="common.loading">Loading…</span></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== MONITOR ====================== -->
+  <section class="page" id="page-monitor" role="tabpanel">
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-speed"/></svg></span>
+          <div><div class="card-title" data-i18n="mon.cpu">CPU load</div><div class="card-sub" data-i18n="mon.window">Last 3 minutes</div></div>
+          <div class="spacer"></div>
+          <span class="chip primary" id="monCpuNow">--</span>
+        </div>
+        <div class="card-body"><canvas class="chart" id="cpuChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-memory"/></svg></span>
+          <div><div class="card-title" data-i18n="mon.memory">Memory usage</div><div class="card-sub" data-i18n="mon.window">Last 3 minutes</div></div>
+          <div class="spacer"></div>
+          <span class="chip primary" id="monMemNow">--</span>
+        </div>
+        <div class="card-body"><canvas class="chart" id="memChart"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-swap_horiz"/></svg></span>
+        <div><div class="card-title" data-i18n="mon.traffic">Network traffic</div><div class="card-sub" data-i18n="mon.trafficSub">Sampled every 2 s</div></div>
+      </div>
+      <div class="card-body">
+        <div class="pills" id="monPills">
+          <button class="pill active" data-iface="wan">WAN</button>
+          <button class="pill" data-iface="lan">LAN</button>
+          <button class="pill" data-iface="wlan">WLAN</button>
+        </div>
+        <canvas class="chart lg" id="trafficChart"></canvas>
+        <div class="legend">
+          <span class="lg-item"><i class="lg-dot" id="monRxDot"></i><span data-i18n="traffic.rx">Received</span><b id="monRxNow">--</b></span>
+          <span class="lg-item"><i class="lg-dot" id="monTxDot"></i><span data-i18n="traffic.tx">Sent</span><b id="monTxNow">--</b></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== WIRELESS ====================== -->
+  <section class="page" id="page-wireless" role="tabpanel">
+    <div class="pills" id="wlPills">
+      <button class="pill active" data-sub="wl-basic"><svg class="ic"><use href="#i-tune"/></svg><span data-i18n="wl.basic">Basic</span></button>
+      <button class="pill" data-sub="wl-sec"><svg class="ic"><use href="#i-lock"/></svg><span data-i18n="wl.secTab">Security</span></button>
+      <button class="pill" data-sub="wl-wps"><svg class="ic"><use href="#i-vpn_key"/></svg><span data-i18n="wl.wpsTab">WPS</span></button>
+      <button class="pill" data-sub="wl-acl"><svg class="ic"><use href="#i-gpp_good"/></svg><span data-i18n="wl.aclTab">Access control</span></button>
+      <button class="pill" data-sub="wl-survey"><svg class="ic"><use href="#i-search"/></svg><span data-i18n="wl.survey">Site survey</span></button>
+      <button class="pill" data-sub="wl-hosts"><svg class="ic"><use href="#i-people"/></svg><span data-i18n="wl.hosts">Stations</span></button>
+      <button class="pill" data-sub="wl-adv"><svg class="ic"><use href="#i-speed"/></svg><span data-i18n="wl.adv">Advanced</span></button>
+    </div>
+
+    <div class="subpage active" id="wl-basic">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-wifi"/></svg></span>
+          <div><div class="card-title" data-i18n="wl.basicTitle">Radio & SSID</div><div class="card-sub" data-i18n="wl.basicSub">2.4 GHz · 802.11 b/g/n</div></div>
+          <div class="spacer"></div>
+          <label class="switch"><input type="checkbox" id="wlEn"><span class="track"></span><span class="small" data-i18n="wl.radio">Radio</span></label>
+        </div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><label data-i18n="wl.ssid">SSID</label><input type="text" id="wlSsidInput" maxlength="32" autocomplete="off"></div>
+            <div class="field"><label data-i18n="wl.workMode">Mode</label>
+              <select id="wlModeSel">
+                <option value="0" data-i18n="wl.modeAp">Access Point (AP)</option>
+                <option value="1" data-i18n="wl.modeClient">Wireless Client (WISP)</option>
+                <option value="4" data-i18n="wl.modeRepeater">Repeater</option>
+                <option value="2" data-i18n="wl.modeWds">WDS</option>
+                <option value="3" data-i18n="wl.modeApWds">AP + WDS</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wl.region">Region</label>
+              <select id="wlRegion">
+                <option value="1">FCC (US) · 1-11</option>
+                <option value="2">IC (Canada) · 1-11</option>
+                <option value="3">ETSI (EU) · 1-13</option>
+                <option value="4">Spain · 10-11</option>
+                <option value="5">France · 10-13</option>
+                <option value="6">MKK (Japan) · 1-14</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n="wl.channel">Channel</label><select id="wlChanSel"></select></div>
+            <div class="field"><label data-i18n="wl.band">Wireless mode</label>
+              <select id="wlBandSel">
+                <option value="0">802.11b</option>
+                <option value="1">802.11g</option>
+                <option value="7">802.11n</option>
+                <option value="2">802.11b+g</option>
+                <option value="9">802.11g+n</option>
+                <option value="10">802.11b+g+n</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wl.width">Channel width</label>
+              <select id="wlWidth">
+                <option value="0">20 MHz</option>
+                <option value="1">40 MHz</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n="wl.broadcast">SSID broadcast</label>
+              <label class="switch" style="margin-top:10px"><input type="checkbox" id="wlBroad"><span class="track"></span></label>
+            </div>
+          </div>
+        </div>
+        <div class="card-foot">
+          <span class="hint" data-i18n="wl.basicHint">Changing radio settings may briefly drop wireless clients.</span>
+          <button class="btn btn-primary" id="wlSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.save">Save</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="subpage" id="wl-sec">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-lock"/></svg></span>
+          <div><div class="card-title" data-i18n="wl.secTitle">Wireless security</div><div class="card-sub" data-i18n="wl.secSub">Applies to the active AP / client profile</div></div>
+        </div>
+        <div class="card-body">
+          <div class="field"><label data-i18n="wl.secMode">Security mode</label>
+            <select id="secMode">
+              <option value="0" data-i18n="wl.secNone">Open / None</option>
+              <option value="1">WEP</option>
+              <option value="2">WPA-PSK (TKIP)</option>
+              <option value="4">WPA2-PSK (AES)</option>
+              <option value="6">WPA / WPA2 mixed</option>
+            </select>
+          </div>
+          <div class="field-row" id="secCipherRow">
+            <div class="field"><label data-i18n="wl.cipher">Cipher</label>
+              <select id="secCipher">
+                <option value="AES">AES</option>
+                <option value="TKIP">TKIP</option>
+                <option value="MIX_TKIP_AES">TKIP + AES</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n="wl.rekey">Group rekey (s)</label><input type="text" id="secRekey" value="86400" maxlength="5"></div>
+          </div>
+          <div class="field"><label data-i18n="wl.passphrase">Passphrase (8-63 chars)</label><input type="password" id="secKey" maxlength="64" autocomplete="new-password"></div>
+        </div>
+        <div class="card-foot">
+          <span class="hint" data-i18n="wl.secHint">Client mode uses this profile to join the upstream AP.</span>
+          <button class="btn btn-primary" id="secSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.save">Save</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="subpage" id="wl-wps">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-vpn_key"/></svg></span>
+          <div><div class="card-title" data-i18n="wl.wpsTitle">WPS</div><div class="card-sub" data-i18n="wl.wpsSub">Push button or PIN pairing</div></div>
+          <div class="spacer"></div>
+          <span class="chip" id="wpsState">--</span>
+        </div>
+        <div class="card-body">
+          <div class="field"><label data-i18n="wl.wpsPin">PIN code</label><input type="text" id="wpsPin" maxlength="8" inputmode="numeric"></div>
+          <p class="muted small" data-i18n="wl.wpsHint">WPS is less secure than WPA2-PSK; disable it when not pairing.</p>
+          <p class="muted small" data-i18n="wl.wpsWarn">Toggling WPS restarts the wireless service, so this page may stop responding for about 20 seconds.</p>
+        </div>
+        <div class="card-foot" style="flex-wrap:wrap">
+          <button class="btn btn-primary" id="wpsToggleBtn"><svg class="ic sm"><use href="#i-vpn_key"/></svg><span data-i18n="wl.wpsEnable">Enable WPS</span></button>
+          <button class="btn btn-ghost" id="wpsGenBtn" data-i18n="wl.wpsGenPin">Generate PIN</button>
+          <button class="btn btn-flat" id="wpsPbcBtn" data-i18n="wl.wpsPbc">PBC connect</button>
+          <button class="btn btn-flat" id="wpsPinBtn" data-i18n="wl.wpsPinConnect">PIN connect</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="subpage" id="wl-acl">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-gpp_good"/></svg></span>
+          <div><div class="card-title" data-i18n="wl.aclTitle">Wireless access control</div><div class="card-sub" data-i18n="wl.aclSub">Allow or deny stations by MAC address</div></div>
+        </div>
+        <div class="card-body">
+          <div class="acl-bar">
+            <label class="switch"><input type="checkbox" id="wlAclEnable"><span class="track"></span><span class="small" data-i18n="lan.enable">Enable</span></label>
+            <select class="acl-rule" id="wlAclMode">
+              <option value="allow" data-i18n="sec.allow">Allow</option>
+              <option value="deny" data-i18n="sec.deny">Deny</option>
+            </select>
+            <button class="btn btn-primary sm" id="wlAclSave"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.save">Save</span></button>
+          </div>
+          <div class="table-wrap"><table class="md">
+            <thead><tr><th data-i18n="sec.descr">Description</th><th>MAC</th><th></th></tr></thead>
+            <tbody id="wlAclTbody"></tbody>
+          </table></div>
+        </div>
+        <div class="card-foot">
+          <span class="hint" data-i18n="wl.aclHint">Rules apply when wireless access control is enabled; use with care.</span>
+          <button class="btn btn-primary" id="wlAclAddBtn"><svg class="ic sm"><use href="#i-add"/></svg><span data-i18n="sec.addRule">Add rule</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="subpage" id="wl-survey">      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-search"/></svg></span>
+          <div><div class="card-title" data-i18n="wl.surveyTitle">Nearby networks</div><div class="card-sub" id="surveySub" data-i18n="wl.surveySub">Scan 2.4 GHz access points</div></div>
+      </div>
+      <div class="card-body tight">
+        <div class="table-wrap">
+          <table class="md">
+            <thead><tr>
+              <th data-i18n="wl.ssid">SSID</th>
+              <th data-i18n="wl.bssid">BSSID</th>
+              <th data-i18n="wl.channel">Channel</th>
+              <th data-i18n="wl.security">Security</th>
+              <th data-i18n="wl.signal">Signal</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="surveyTbody"><tr><td colspan="6"><div class="empty"><svg class="ic"><use href="#i-wifi"/></svg><span data-i18n="wl.scanHint">Press Scan to look for access points.</span></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="wl.surveySub">Scan 2.4 GHz access points</span>
+        <button class="btn btn-primary" id="surveyBtn"><svg class="ic sm"><use href="#i-refresh"/></svg><span data-i18n="wl.scan">Scan</span></button>
+      </div>
+    </div>
+    </div>
+
+    <div class="subpage" id="wl-hosts">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-people"/></svg></span>
+          <div><div class="card-title" data-i18n="wl.hostsTitle">Associated stations</div><div class="card-sub" id="hostsSub">--</div></div>
+          <div class="spacer"></div>
+          <button class="btn btn-flat sm" id="hostsRefreshBtn"><svg class="ic sm"><use href="#i-refresh"/></svg><span data-i18n="common.refresh">Refresh</span></button>
+        </div>
+        <div class="card-body tight">
+          <div class="table-wrap">
+            <table class="md">
+              <thead><tr>
+                <th data-i18n="clients.mac">MAC</th>
+                <th data-i18n="wl.rate">Rate</th>
+                <th data-i18n="wl.mode">Mode</th>
+                <th data-i18n="wl.powersave">Power save</th>
+                <th data-i18n="wl.connected">Connected</th>
+              </tr></thead>
+              <tbody id="hostsTbody"><tr><td colspan="5"><div class="empty"><svg class="ic"><use href="#i-people"/></svg><span data-i18n="common.loading">Loading…</span></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subpage" id="wl-adv">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-speed"/></svg></span>
+          <div><div class="card-title" data-i18n="wl.advTitle">Advanced RF</div><div class="card-sub" data-i18n="wl.advSub">Radio timing, aggregation and protection</div></div>
+        </div>
+        <div class="card-body">
+          <div class="field-row">
+            <div class="field"><label data-i18n="wl.beacon">Beacon interval</label><input type="text" id="advBeaconVal" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label data-i18n="wl.rts">RTS threshold</label><input type="text" id="advRtsVal" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label data-i18n="wl.fragment">Fragment threshold</label><input type="text" id="advFragVal" maxlength="4" inputmode="numeric"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wl.dtim">DTIM period</label><input type="text" id="advDtimVal" maxlength="2" inputmode="numeric"></div>
+            <div class="field"><label data-i18n="wl.rateMode">Transmit rate</label>
+              <select id="advRateSel"></select>
+            </div>
+            <div class="field"><label data-i18n="wl.aggregation">Aggregation</label>
+              <select id="advAggSel">
+                <option value="Auto">Disable</option>
+                <option value="Open">AMPDU</option>
+                <option value="Shared">AMSDU</option>
+                <option value="Mixed">AMPDU + AMSDU</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n="wl.authType">Authentication</label>
+              <select id="advAuthSel">
+                <option value="Auto">Auto</option>
+                <option value="Open">Open System</option>
+                <option value="Shared">Shared Key</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wl.preamble">Preamble</label>
+              <select id="advPreamSel"><option value="long">Long</option><option value="short">Short</option></select>
+            </div>
+            <div class="field"><label data-i18n="wl.txPower">TX power</label>
+              <select id="advPowerSel">
+                <option value="0">100%</option><option value="1">70%</option><option value="2">50%</option>
+                <option value="3">35%</option><option value="4">15%</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid cols-3">
+            <label class="switch"><input type="checkbox" id="advShortGi"><span class="track"></span><span class="small" data-i18n="wl.shortGi">Short GI</span></label>
+            <label class="switch"><input type="checkbox" id="advGmode"><span class="track"></span><span class="small" data-i18n="wl.gmode">G-mode protection</span></label>
+            <label class="switch"><input type="checkbox" id="advIsolation"><span class="track"></span><span class="small" data-i18n="wl.isolation">AP isolation</span></label>
+            <label class="switch"><input type="checkbox" id="advIapp"><span class="track"></span><span class="small">IAPP</span></label>
+            <label class="switch"><input type="checkbox" id="advWmm"><span class="track"></span><span class="small" data-i18n="wl.wmm">WMM</span></label>
+          </div>
+          <div class="notice warn" style="margin-top:14px"><svg class="ic"><use href="#i-warning"/></svg><span data-i18n="wl.advWarn">Applying RF parameters restarts the radio and drops wireless clients briefly.</span></div>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary" id="advSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save &amp; apply</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== WAN ====================== -->
+  <section class="page" id="page-wan" role="tabpanel">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-settings_ethernet"/></svg></span>
+        <div><div class="card-title" data-i18n="wan.title">Internet connection</div><div class="card-sub" id="wanTypeSub">--</div></div>
+        <div class="spacer"></div>
+        <span class="chip" id="wanTypeChip">--</span>
+      </div>
+      <div class="card-body">
+        <div class="pills" id="wanTypePills">
+          <button class="pill active" data-wantype="dhcp"><svg class="ic"><use href="#i-sync"/></svg>DHCP</button>
+          <button class="pill" data-wantype="static"><svg class="ic"><use href="#i-gpp_good"/></svg><span data-i18n="wan.static">Static IP</span></button>
+          <button class="pill" data-wantype="pppoe"><svg class="ic"><use href="#i-vpn_key"/></svg>PPPoE</button>
+        </div>
+        <div class="row" style="margin:6px 0 12px">
+          <button class="btn btn-ghost sm" id="wanDetectBtn"><svg class="ic sm"><use href="#i-search"/></svg><span data-i18n="wan.detect">Detect</span></button>
+          <span class="hint" id="wanDetectHint"></span>
+        </div>
+
+        <div class="subpage active" id="wan-dhcp">
+          <p class="muted small" data-i18n="wan.dhcpHint" style="margin-bottom:14px">Obtain the WAN address automatically from the upstream DHCP server.</p>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wan.mtu">MTU</label><input type="text" id="dhcpMtu" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label data-i18n="wan.dnsMode">DNS</label>
+              <select id="dhcpDnsMode"><option value="auto" data-i18n="wan.dnsAuto">Automatic</option><option value="manual" data-i18n="wan.dnsManual">Manual</option></select>
+            </div>
+          </div>
+          <div class="field-row" id="dhcpDnsRow">
+            <div class="field"><label data-i18n="wan.dns1">Primary DNS</label><input type="text" id="dhcpDns1" maxlength="15" placeholder="0.0.0.0"></div>
+            <div class="field"><label data-i18n="wan.dns2">Secondary DNS</label><input type="text" id="dhcpDns2" maxlength="15" placeholder="0.0.0.0"></div>
+          </div>
+        </div>
+
+        <div class="subpage" id="wan-static">
+          <div class="field-row">
+            <div class="field"><label data-i18n="wan.ip">IP address</label><input type="text" id="stIp" maxlength="15"></div>
+            <div class="field"><label data-i18n="wan.mask">Subnet mask</label><input type="text" id="stMask" maxlength="15"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wan.gw">Gateway</label><input type="text" id="stGw" maxlength="15"></div>
+            <div class="field"><label data-i18n="wan.mtu">MTU</label><input type="text" id="stMtu" maxlength="4" inputmode="numeric"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wan.dns1">Primary DNS</label><input type="text" id="stDns1" maxlength="15" placeholder="0.0.0.0"></div>
+            <div class="field"><label data-i18n="wan.dns2">Secondary DNS</label><input type="text" id="stDns2" maxlength="15" placeholder="0.0.0.0"></div>
+          </div>
+        </div>
+
+        <div class="subpage" id="wan-pppoe">
+          <div class="field-row">
+            <div class="field"><label data-i18n="wan.ppUser">Username</label><input type="text" id="ppUser" maxlength="127" autocomplete="off"></div>
+            <div class="field"><label data-i18n="wan.ppPass">Password</label><input type="password" id="ppPass" maxlength="127" autocomplete="new-password"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wan.ppMode">Dial mode</label>
+              <select id="ppMode">
+                <option value="0" data-i18n="wan.ppAuto">Auto connect</option>
+                <option value="1" data-i18n="wan.ppOnDemand">On demand</option>
+                <option value="2" data-i18n="wan.ppManual">Manual</option>
+              </select>
+            </div>
+            <div class="field"><label data-i18n="wan.ppIdle">Idle timeout (min)</label><input type="text" id="ppIdle" maxlength="2" inputmode="numeric"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="wan.mtu">MTU</label><input type="text" id="ppMtu" maxlength="4" inputmode="numeric"></div>
+            <div class="field"><label data-i18n="wan.dns1">Primary DNS</label><input type="text" id="ppDns1" maxlength="15" placeholder="0.0.0.0"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="wan.saveHint">The connection may drop for a few seconds while applying.</span>
+        <button class="btn btn-primary" id="wanSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save & apply</span></button>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-computer"/></svg></span>
+        <div><div class="card-title" data-i18n="wan.macTitle">MAC address</div><div class="card-sub" data-i18n="wan.macSub">Clone or customise the WAN MAC</div></div>
+      </div>
+      <div class="card-body">
+        <div class="kv"><span class="kv-key" data-i18n="wan.macCurrent">Current</span><span class="kv-val mono" id="macCurrent">--</span></div>
+        <div class="kv"><span class="kv-key" data-i18n="wan.macDefault">Factory default</span><span class="kv-val mono" id="macDefault">--</span></div>
+        <div class="field mt"><label data-i18n="wan.macCustom">Custom MAC</label><input type="text" id="macInput" maxlength="17" placeholder="00:11:22:33:44:55"></div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-ghost" id="macCloneBtn"><svg class="ic sm"><use href="#i-link"/></svg><span data-i18n="wan.clonePc">Clone PC MAC</span></button>
+        <button class="btn btn-ghost" id="macDefaultBtn" data-i18n="wan.restoreDefault">Restore default</button>
+        <button class="btn btn-primary" id="macSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save &amp; apply</span></button>
+      </div>
+    </div>
+
+    <div class="card mt" id="ddnsCard">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-public"/></svg></span>
+        <div><div class="card-title" data-i18n="wan.ddnsTitle">Dynamic DNS</div><div class="card-sub" data-i18n="wan.ddnsSub">Reach the router by a fixed hostname</div></div>
+        <div class="spacer"></div>
+        <span class="chip" id="ddnsState">--</span>
+      </div>
+      <div class="card-body">
+        <div class="row" style="margin-bottom:8px">
+          <label class="switch"><input type="checkbox" id="ddnsEnable"><span class="track"></span><span class="small" data-i18n="wan.ddnsEnable">Enable DDNS</span></label>
+        </div>
+        <div class="field"><label data-i18n="wan.ddnsProvider">Service provider</label>
+          <select id="ddnsSp">
+            <option value="1">Oray</option>
+            <option value="0">DynDNS</option>
+            <option value="2">meibu</option>
+            <option value="4">dlinkddns</option>
+            <option value="5">no-ip</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field"><label data-i18n="wan.ddnsUser">Username</label><input type="text" id="ddnsUser" maxlength="63" autocomplete="off"></div>
+          <div class="field"><label data-i18n="wan.ddnsPass">Password</label><input type="password" id="ddnsPass" maxlength="63" autocomplete="new-password"></div>
+        </div>
+        <div class="field"><label data-i18n="wan.ddnsHost">Hostname</label><input type="text" id="ddnsHost" maxlength="127" placeholder="myrouter.dyndns.org" autocomplete="off"></div>
+        <p class="muted small" data-i18n="wan.ddnsHint">DynDNS / no-ip need the full hostname and account credentials.</p>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-primary" id="ddnsSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save &amp; apply</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== LAN ====================== -->
+  <section class="page" id="page-lan" role="tabpanel">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-lan"/></svg></span>
+        <div><div class="card-title" data-i18n="lan.title">LAN IP address</div><div class="card-sub" data-i18n="lan.sub">One address per hardware mode</div></div>
+      </div>
+      <div class="card-body">
+        <div class="mode-row" id="lanModeRouter">
+          <div class="mode-row-head"><span data-i18n="mode.router">Router mode</span><span class="chip primary mode-badge" data-i18n="lan.current">Current</span></div>
+          <div class="grid cols-2">
+            <div class="field"><label data-i18n="lan.ip">IP address</label><input type="text" id="lanIpRouter" maxlength="15"></div>
+            <div class="field"><label data-i18n="lan.mask">Subnet mask</label><input type="text" id="lanMaskRouter" maxlength="15"></div>
+          </div>
+        </div>
+        <div class="mode-row" id="lanModeAp">
+          <div class="mode-row-head"><span data-i18n="mode.ap">AP mode</span><span class="chip primary mode-badge" data-i18n="lan.current">Current</span></div>
+          <div class="grid cols-2">
+            <div class="field"><label data-i18n="lan.ip">IP address</label><input type="text" id="lanIpAp" maxlength="15"></div>
+            <div class="field"><label data-i18n="lan.mask">Subnet mask</label><input type="text" id="lanMaskAp" maxlength="15"></div>
+          </div>
+        </div>
+        <div class="mode-row" id="lanModeClient">
+          <div class="mode-row-head"><span data-i18n="mode.client">Client mode</span><span class="chip primary mode-badge" data-i18n="lan.current">Current</span></div>
+          <div class="grid cols-2">
+            <div class="field"><label data-i18n="lan.ip">IP address</label><input type="text" id="lanIpClient" maxlength="15"></div>
+            <div class="field"><label data-i18n="lan.mask">Subnet mask</label><input type="text" id="lanMaskClient" maxlength="15"></div>
+          </div>
+        </div>
+        <div class="notice warn"><svg class="ic"><use href="#i-warning"/></svg><span data-i18n="lan.rebootWarn">Changing the LAN IP restarts the router. Reconnect using the new address.</span></div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-primary" id="lanSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save & apply</span></button>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-dns"/></svg></span>
+        <div><div class="card-title" data-i18n="lan.dhcpTitle">DHCP server</div><div class="card-sub" data-i18n="lan.dhcpSub">Address pool for LAN clients</div></div>
+        <div class="spacer"></div>
+        <label class="switch"><input type="checkbox" id="dhcpEnable"><span class="track"></span><span class="small" data-i18n="lan.enable">Enable</span></label>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field"><label data-i18n="lan.startIp">Start IP</label><input type="text" id="dhcpStart" maxlength="15"></div>
+          <div class="field"><label data-i18n="lan.endIp">End IP</label><input type="text" id="dhcpEnd" maxlength="15"></div>
+        </div>
+        <div class="field"><label data-i18n="lan.lease">Lease time (seconds)</label><input type="text" id="dhcpLease" maxlength="7" inputmode="numeric"></div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-primary" id="dhcpSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save & apply</span></button>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-devices"/></svg></span>
+        <div><div class="card-title" data-i18n="lan.leases">DHCP leases</div><div class="card-sub" id="leaseSub">--</div></div>
+        <div class="spacer"></div>
+        <button class="btn btn-flat sm" id="leaseRefreshBtn"><svg class="ic sm"><use href="#i-refresh"/></svg><span data-i18n="common.refresh">Refresh</span></button>
+      </div>
+      <div class="card-body tight">
+        <div class="table-wrap">
+          <table class="md">
+            <thead><tr><th>#</th><th data-i18n="clients.ip">IP</th><th data-i18n="clients.mac">MAC</th><th data-i18n="clients.type">Type</th></tr></thead>
+            <tbody id="leaseTbody"><tr><td colspan="4"><div class="empty"><span data-i18n="common.loading">Loading…</span></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-lock"/></svg></span>
+        <div><div class="card-title" data-i18n="lan.reserveTitle">Static reservations</div><div class="card-sub" data-i18n="lan.reserveSub">MAC → IP bindings</div></div>
+      </div>
+      <div class="card-body tight">
+        <div class="table-wrap">
+          <table class="md">
+            <thead><tr><th data-i18n="clients.mac">MAC</th><th data-i18n="clients.ip">IP</th><th></th></tr></thead>
+            <tbody id="reserveTbody"><tr><td colspan="3"><div class="empty"><span data-i18n="common.none">No entries</span></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="lan.reserveHint">Add or remove reservations in the classic interface.</span>
+        <button class="btn btn-primary" id="reserveAddBtn"><svg class="ic sm"><use href="#i-add"/></svg><span data-i18n="lan.addReserve">Add binding</span></button>
+      </div>
+    </div>
+
+    <div class="card mt" id="routeCard">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-router"/></svg></span>
+        <div><div class="card-title" data-i18n="route.title">Static routing</div><div class="card-sub" data-i18n="route.sub">Send a destination network through a gateway</div></div>
+      </div>
+      <div class="card-body">
+        <div class="table-wrap"><table class="md">
+          <thead><tr>
+            <th data-i18n="route.type">Type</th>
+            <th data-i18n="route.target">Destination</th>
+            <th data-i18n="route.mask">Netmask</th>
+            <th data-i18n="route.gateway">Gateway</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="routeTbody"></tbody>
+        </table></div>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="route.hint">Static routes take effect immediately.</span>
+        <button class="btn btn-primary" id="routeAddBtn"><svg class="ic sm"><use href="#i-add"/></svg><span data-i18n="route.add">Add route</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== WISP ====================== -->
+  <section class="page" id="page-client" role="tabpanel">
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-wifi_tethering"/></svg></span>
+          <div><div class="card-title" data-i18n="wisp.linkTitle">Upstream link</div><div class="card-sub" id="wispLinkSub">--</div></div>
+          <div class="spacer"></div>
+          <span class="chip" id="wispStateChip">--</span>
+        </div>
+        <div class="card-body">
+          <div class="kv"><span class="kv-key" data-i18n="wl.ssid">SSID</span><span class="kv-val" id="wispSsid">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wl.bssid">BSSID</span><span class="kv-val mono" id="wispBssid">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wl.channel">Channel</span><span class="kv-val" id="wispChan">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wisp.signal">Signal</span><span class="kv-val" id="wispSignal">--</span></div>
+          <div class="kv"><span class="kv-key" data-i18n="wisp.localIp">Local IP</span><span class="kv-val mono" id="wispLocalIp">--</span></div>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-flat sm" id="wispRefreshBtn"><svg class="ic sm"><use href="#i-refresh"/></svg><span data-i18n="common.refresh">Refresh</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-cell_tower"/></svg></span>
+          <div><div class="card-title" data-i18n="wisp.scanTitle">Join a wireless network</div><div class="card-sub" data-i18n="wisp.scanSub">Scan, pick an AP, then enter its password</div></div>
+        </div>
+        <div class="card-body">
+          <div class="notice" style="margin-bottom:0"><svg class="ic"><use href="#i-info"/></svg><span data-i18n="wisp.tip">Joining writes the selected SSID and password into the client profile automatically.</span></div>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary block" id="wispScanBtn"><svg class="ic sm"><use href="#i-search"/></svg><span data-i18n="wisp.scanCta">Scan for networks</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-wifi"/></svg></span>
+        <div><div class="card-title" data-i18n="wisp.available">Available networks</div><div class="card-sub" id="wispScanSub" data-i18n="wisp.availableSub">2.4 GHz scan results</div></div>
+      </div>
+      <div class="card-body tight">
+        <div class="table-wrap">
+          <table class="md">
+            <thead><tr>
+              <th data-i18n="wl.ssid">SSID</th>
+              <th data-i18n="wl.bssid">BSSID</th>
+              <th data-i18n="wl.channel">Channel</th>
+              <th data-i18n="wl.security">Security</th>
+              <th data-i18n="wl.signal">Signal</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="wispTbody"><tr><td colspan="6"><div class="empty"><svg class="ic"><use href="#i-wifi_tethering"/></svg><span data-i18n="wisp.scanHint">Scan to list nearby access points.</span></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== SECURITY ====================== -->
+  <section class="page" id="page-security" role="tabpanel">
+    <div class="card">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-call_split"/></svg></span>
+        <div><div class="card-title" data-i18n="sec.pfTitle">Port forwarding</div><div class="card-sub" data-i18n="sec.pfSub">Virtual server rules</div></div>
+      </div>
+      <div class="card-body tight">
+        <div class="table-wrap">
+          <table class="md">
+            <thead><tr>
+              <th data-i18n="sec.name">Name</th>
+              <th data-i18n="sec.lanIp">LAN IP</th>
+              <th data-i18n="sec.proto">Protocol</th>
+              <th data-i18n="sec.extPort">WAN port</th>
+              <th data-i18n="sec.intPort">LAN port</th>
+              <th></th>
+            </tr></thead>
+            <tbody id="pfTbody"><tr><td colspan="6"><div class="empty"><svg class="ic"><use href="#i-call_split"/></svg><span data-i18n="sec.pfEmpty">No forwarding rules</span></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="sec.pfHint">Forward inbound WAN ports to a LAN host.</span>
+        <button class="btn btn-primary" id="pfAddBtn"><svg class="ic sm"><use href="#i-add"/></svg><span data-i18n="sec.addRule">Add rule</span></button>
+      </div>
+    </div>
+
+    <div class="card mt" id="ptCard">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-swap_horiz"/></svg></span>
+        <div><div class="card-title" data-i18n="pt.title">Port triggering</div><div class="card-sub" data-i18n="pt.sub">Open forwarding ports after outbound traffic</div></div>
+      </div>
+      <div class="card-body">
+        <div class="table-wrap"><table class="md">
+          <thead><tr>
+            <th data-i18n="sec.descr">Description</th>
+            <th data-i18n="pt.trigger">Trigger</th>
+            <th data-i18n="pt.forward">Forward</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="ptTbody"></tbody>
+        </table></div>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="pt.hint">For applications that need inbound ports only after an outbound connection.</span>
+        <button class="btn btn-primary" id="ptAddBtn"><svg class="ic sm"><use href="#i-add"/></svg><span data-i18n="sec.addRule">Add rule</span></button>
+      </div>
+    </div>
+
+    <div class="grid cols-2 mt">
+      <div class="card" id="dmzCard">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-public"/></svg></span>
+          <div><div class="card-title">DMZ</div><div class="card-sub" data-i18n="sec.dmzSub2">目标主机将完全暴露在互联网上，请谨慎使用。</div></div>
+          <div class="spacer"></div>
+          <label class="switch"><input type="checkbox" id="dmzHeadEnable"><span class="track"></span><span class="small" data-i18n="lan.enable">启用</span></label>
+        </div>
+        <div class="card-body">
+          <div class="pills" id="dmzPills">
+            <button class="pill active" data-dmz="normal">DMZ</button>
+            <button class="pill" data-dmz="super" data-i18n="sec.superDmz">超级 DMZ</button>
+          </div>
+          <div class="subpage active" id="dmz-normal">
+            <div class="field"><label data-i18n="sec.dmzIp">DMZ 主机 IP</label>
+              <div class="input-with-sel">
+                <input type="text" id="dmzIp" maxlength="15" placeholder="192.168.0.100">
+                <span class="devsel-slot" data-target="dmzIp" data-kind="ip"></span>
+              </div>
+            </div>
+          </div>
+          <div class="subpage" id="dmz-super">
+            <div class="field"><label data-i18n="sec.superDmzMac">目标 MAC</label>
+              <div class="input-with-sel">
+                <input type="text" id="superDmzMac" maxlength="17" placeholder="00:11:22:33:44:55">
+                <span class="devsel-slot" data-target="superDmzMac" data-kind="mac"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-foot">
+          <span class="hint" data-i18n="sec.dmzHint">同一时间只能启用一种 DMZ。</span>
+          <button class="btn btn-primary" id="dmzSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span id="dmzSaveLabel" data-i18n="sec.saveDmz">保存 DMZ</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-hub"/></svg></span>
+          <div><div class="card-title">UPnP</div><div class="card-sub" data-i18n="sec.upnpSub">Automatic port mapping for apps</div></div>
+          <div class="spacer"></div>
+          <label class="switch"><input type="checkbox" id="upnpEnable"><span class="track"></span><span class="small" data-i18n="lan.enable">Enable</span></label>
+        </div>
+        <div class="card-body">
+          <p class="muted small" data-i18n="sec.upnpHint">When enabled, LAN applications can open ports on demand.</p>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary" id="upnpSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save &amp; apply</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt" id="aclCard">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-gpp_good"/></svg></span>
+        <div><div class="card-title" data-i18n="sec.filters">Access filters</div><div class="card-sub" data-i18n="sec.filtersSub">MAC / IP / URL filtering</div></div>
+      </div>
+      <div class="card-body">
+        <div class="pills" id="aclPills">
+          <button class="pill active" data-acl="mac"><span data-i18n="sec.macFilter">MAC filter</span></button>
+          <button class="pill" data-acl="ip"><span data-i18n="sec.ipFilter">IP filter</span></button>
+          <button class="pill" data-acl="url"><span data-i18n="sec.urlFilter">URL filter</span></button>
+        </div>
+
+        <div class="subpage active" id="acl-mac">
+          <div class="acl-bar">
+            <label class="switch"><input type="checkbox" id="macAclEnable"><span class="track"></span><span class="small" data-i18n="lan.enable">Enable</span></label>
+            <select class="acl-rule" id="macAclRule"><option value="1" data-i18n="sec.allow">Allow</option><option value="0" data-i18n="sec.deny">Deny</option></select>
+            <button class="btn btn-primary sm" id="macAclSave"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.save">Save</span></button>
+          </div>
+          <div class="table-wrap"><table class="md">
+            <thead><tr><th data-i18n="sec.descr">Description</th><th>MAC</th><th data-i18n="sec.schedule">Schedule</th><th data-i18n="sec.rule">Rule</th><th></th></tr></thead>
+            <tbody id="macAclTbody"></tbody>
+          </table></div>
+        </div>
+
+        <div class="subpage" id="acl-ip">
+          <div class="acl-bar">
+            <label class="switch"><input type="checkbox" id="ipAclEnable"><span class="track"></span><span class="small" data-i18n="lan.enable">Enable</span></label>
+            <select class="acl-rule" id="ipAclRule"><option value="1" data-i18n="sec.allow">Allow</option><option value="0" data-i18n="sec.deny">Deny</option></select>
+            <button class="btn btn-primary sm" id="ipAclSave"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.save">Save</span></button>
+          </div>
+          <div class="table-wrap"><table class="md">
+            <thead><tr><th data-i18n="sec.descr">Description</th><th>IP</th><th data-i18n="sec.proto">Protocol</th><th data-i18n="sec.intPort">Port</th><th data-i18n="sec.schedule">Schedule</th><th data-i18n="sec.rule">Rule</th><th></th></tr></thead>
+            <tbody id="ipAclTbody"></tbody>
+          </table></div>
+        </div>
+
+        <div class="subpage" id="acl-url">
+          <div class="acl-bar">
+            <label class="switch"><input type="checkbox" id="urlAclEnable"><span class="track"></span><span class="small" data-i18n="lan.enable">Enable</span></label>
+            <select class="acl-rule" id="urlAclRule"><option value="1" data-i18n="sec.allow">Allow</option><option value="0" data-i18n="sec.deny">Deny</option></select>
+            <button class="btn btn-primary sm" id="urlAclSave"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.save">Save</span></button>
+          </div>
+          <div class="table-wrap"><table class="md">
+            <thead><tr><th data-i18n="sec.keyword">Keyword</th><th data-i18n="sec.schedule">Schedule</th><th data-i18n="sec.rule">Rule</th><th></th></tr></thead>
+            <tbody id="urlAclTbody"></tbody>
+          </table></div>
+        </div>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="sec.filterHint">Rules apply to LAN clients; the time window is always on.</span>
+        <button class="btn btn-primary" id="aclAddBtn"><svg class="ic sm"><use href="#i-add"/></svg><span data-i18n="sec.addRule">Add rule</span></button>
+      </div>
+    </div>
+
+    <div class="card mt" id="qosCard">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-speed"/></svg></span>
+        <div><div class="card-title" data-i18n="qos.title">Bandwidth control (QoS)</div><div class="card-sub" data-i18n="qos.sub">Total bandwidth and per-host limits</div></div>
+        <div class="spacer"></div>
+        <label class="switch"><input type="checkbox" id="qosEnable"><span class="track"></span><span class="small" data-i18n="qos.enable">Enable</span></label>
+      </div>
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field"><label data-i18n="qos.up">Upload bandwidth (Kbps)</label><input type="text" id="qosUp" maxlength="6" inputmode="numeric"></div>
+          <div class="field"><label data-i18n="qos.down">Download bandwidth (Kbps)</label><input type="text" id="qosDown" maxlength="6" inputmode="numeric"></div>
+        </div>
+        <div class="row" style="gap:18px;flex-wrap:wrap;margin-bottom:12px">
+          <label class="switch"><input type="checkbox" id="qosAutoUp"><span class="track"></span><span class="small" data-i18n="qos.autoUp">Auto upload</span></label>
+          <label class="switch"><input type="checkbox" id="qosAutoDown"><span class="track"></span><span class="small" data-i18n="qos.autoDown">Auto download</span></label>
+        </div>
+        <div class="table-wrap"><table class="md">
+          <thead><tr>
+            <th data-i18n="qos.name">Name</th>
+            <th data-i18n="qos.ipRange">IP range</th>
+            <th data-i18n="qos.minUp">Min up</th>
+            <th data-i18n="qos.minDown">Min down</th>
+            <th data-i18n="qos.maxUp">Max up</th>
+            <th data-i18n="qos.maxDown">Max down</th>
+            <th></th>
+          </tr></thead>
+          <tbody id="qosTbody"></tbody>
+        </table></div>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="qos.hint">0 means automatic; units are Kbps.</span>
+        <button class="btn btn-flat" id="qosAddBtn"><svg class="ic sm"><use href="#i-add"/></svg><span data-i18n="qos.addRule">Add rule</span></button>
+        <button class="btn btn-primary" id="qosSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save &amp; apply</span></button>
+      </div>
+    </div>
+
+    <div class="card mt" id="advNetCard">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-settings_ethernet"/></svg></span>
+        <div><div class="card-title" data-i18n="adv.title">Advanced networking</div><div class="card-sub" data-i18n="adv.sub">IGMP, VPN pass-through and FTP ALG</div></div>
+      </div>
+      <div class="card-body">
+        <div class="adv-list">
+          <div class="adv-row">
+            <div class="adv-main">
+              <div class="adv-name">IGMP Proxy</div>
+              <div class="adv-sub" data-i18n="adv.igmpHint">Required by some IPTV services that use multicast.</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="advIgmp"><span class="track"></span></label>
+          </div>
+          <div class="adv-row">
+            <div class="adv-main">
+              <div class="adv-name" data-i18n="adv.vpn">VPN pass-through</div>
+              <div class="adv-sub" data-i18n="adv.vpnHint">VPN pass-through for PPTP / L2TP / IPSec.</div>
+            </div>
+            <div class="adv-controls">
+              <label class="switch"><input type="checkbox" id="advPptp"><span class="track"></span><span class="small">PPTP</span></label>
+              <label class="switch"><input type="checkbox" id="advL2tp"><span class="track"></span><span class="small">L2TP</span></label>
+              <label class="switch"><input type="checkbox" id="advIpsec"><span class="track"></span><span class="small">IPSec</span></label>
+            </div>
+          </div>
+          <div class="adv-row">
+            <div class="adv-main">
+              <div class="adv-name">FTP ALG</div>
+              <div class="adv-sub" data-i18n="adv.ftpPort">Private port</div>
+            </div>
+            <div class="adv-controls">
+              <label class="switch"><input type="checkbox" id="advFtp"><span class="track"></span></label>
+              <input type="text" id="advFtpPort" class="adv-port" maxlength="5" inputmode="numeric">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-primary" id="advNetSave"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save &amp; apply</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== SYSTEM ====================== -->
+  <section class="page" id="page-system" role="tabpanel">
+    <div class="grid cols-2">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-key"/></svg></span>
+          <div><div class="card-title" data-i18n="sys.pwdTitle">Administrator password</div><div class="card-sub" data-i18n="sys.pwdSub">Web login credentials</div></div>
+        </div>
+        <div class="card-body">
+          <div class="field"><label data-i18n="sys.oldPwd">Current password</label><input type="password" id="pwdOld" maxlength="30" autocomplete="current-password"></div>
+          <div class="field"><label data-i18n="sys.user">Username</label><input type="text" id="pwdUser" maxlength="19" autocomplete="username"></div>
+          <div class="field-row">
+            <div class="field"><label data-i18n="sys.newPwd">New password</label><input type="password" id="pwdNew" maxlength="30" autocomplete="new-password"></div>
+            <div class="field"><label data-i18n="sys.confirmPwd">Confirm</label><input type="password" id="pwdNew2" maxlength="30" autocomplete="new-password"></div>
+          </div>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary" id="pwdSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.save">Save</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-schedule"/></svg></span>
+          <div><div class="card-title" data-i18n="sys.timeTitle">Time & NTP</div><div class="card-sub" id="timeNow">--</div></div>
+        </div>
+        <div class="card-body">
+          <div class="field"><label data-i18n="sys.timezone">Time zone</label><select id="tzSelect"></select></div>
+          <div class="field"><label data-i18n="sys.ntp">NTP server</label><input type="text" id="ntpServer" maxlength="63" placeholder="203.107.6.88"></div>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary" id="timeSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.save">Save</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-system_update"/></svg></span>
+        <div><div class="card-title" data-i18n="sys.fwTitle">Firmware upgrade</div><div class="card-sub" id="fwVersion">--</div></div>
+      </div>
+      <div class="card-body">
+        <p class="muted small" data-i18n="sys.fwHint" style="margin-bottom:12px">Select a signed .bin image. Do not power off during the upgrade.</p>
+        <input type="file" id="fwFile" accept=".bin" class="hidden">
+        <div class="row">
+          <button class="btn btn-flat" id="fwPickBtn"><svg class="ic sm"><use href="#i-description"/></svg><span data-i18n="sys.chooseFile">Choose file</span></button>
+          <span class="small muted" id="fwFileName" data-i18n="sys.noFile">No file selected</span>
+        </div>
+      </div>
+      <div class="card-foot">
+        <button class="btn btn-primary" id="fwUpgradeBtn" disabled><svg class="ic sm"><use href="#i-cloud_upload"/></svg><span data-i18n="sys.upgrade">Upgrade</span></button>
+      </div>
+    </div>
+
+    <div class="grid cols-2 mt">
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-power"/></svg></span>
+          <div><div class="card-title" data-i18n="sys.wolTitle">Wake on LAN</div><div class="card-sub" data-i18n="sys.wolSub">Send a magic packet to a MAC</div></div>
+        </div>
+        <div class="card-body">
+          <div class="field"><label data-i18n="sys.wolMac">Target MAC</label>
+            <div class="input-with-sel">
+              <input type="text" id="wolMac" maxlength="17" placeholder="00:11:22:33:44:55">
+              <span class="devsel-slot" data-target="wolMac" data-kind="mac"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary" id="wolBtn"><svg class="ic sm"><use href="#i-power_settings_new"/></svg><span data-i18n="sys.wolBtn">Wake</span></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="card-icon"><svg class="ic"><use href="#i-public"/></svg></span>
+          <div><div class="card-title" data-i18n="sys.remoteTitle">Remote management</div><div class="card-sub" data-i18n="sys.remoteSub">Reach the web UI from the WAN</div></div>
+          <div class="spacer"></div>
+          <label class="switch"><input type="checkbox" id="remoteEnable"><span class="track"></span><span class="small" data-i18n="lan.enable">Enable</span></label>
+        </div>
+        <div class="card-body">
+          <div class="field"><label data-i18n="sys.remotePort">Port</label><input type="text" id="remotePort" maxlength="5" inputmode="numeric" placeholder="8080"></div>
+          <p class="muted small" data-i18n="sys.remoteHint">After enabling, open http://&lt;WAN IP&gt;:port from outside.</p>
+        </div>
+        <div class="card-foot">
+          <button class="btn btn-primary" id="remoteSaveBtn"><svg class="ic sm"><use href="#i-save"/></svg><span data-i18n="common.saveApply">Save &amp; apply</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid cols-2 mt">
+      <div class="card">
+        <div class="card-head"><span class="card-icon"><svg class="ic"><use href="#i-power_settings_new"/></svg></span><div><div class="card-title" data-i18n="sys.reboot">Reboot</div></div></div>
+        <div class="card-body"><p class="muted small" data-i18n="sys.rebootHint">Restart the device without losing settings.</p></div>
+        <div class="card-foot"><button class="btn btn-flat" id="rebootBtn"><svg class="ic sm"><use href="#i-power_settings_new"/></svg><span data-i18n="sys.rebootNow">Reboot now</span></button></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="card-icon" style="background:rgba(229,57,53,.1);color:var(--err)"><svg class="ic"><use href="#i-restore"/></svg></span><div><div class="card-title" data-i18n="sys.reset">Factory reset</div></div></div>
+        <div class="card-body"><p class="muted small" data-i18n="sys.resetHint">Erase all settings and restore defaults.</p></div>
+        <div class="card-foot"><button class="btn btn-danger" id="resetBtn"><svg class="ic sm"><use href="#i-restore"/></svg><span data-i18n="sys.resetNow">Reset</span></button></div>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card-head">
+        <span class="card-icon"><svg class="ic"><use href="#i-description"/></svg></span>
+        <div><div class="card-title" data-i18n="sys.logTitle">System log</div><div class="card-sub" data-i18n="sys.logSub">Recent kernel and connection events</div></div>
+        <div class="spacer"></div>
+        <span class="chip" id="logCount">--</span>
+      </div>
+      <div class="card-body">
+        <div class="pills" id="logPills">
+          <button class="pill active" data-log="all"><svg class="ic"><use href="#i-description"/></svg><span data-i18n="sys.logAll">System</span></button>
+          <button class="pill" data-log="connect"><svg class="ic"><use href="#i-link"/></svg><span data-i18n="sys.logConnect">Connections</span></button>
+        </div>
+        <pre class="logbox" id="logBox">--</pre>
+      </div>
+      <div class="card-foot">
+        <span class="hint" data-i18n="sys.logHint">The router keeps a limited ring buffer; clearing is permanent.</span>
+        <button class="btn btn-ghost" id="logRefreshBtn"><svg class="ic sm"><use href="#i-refresh"/></svg><span data-i18n="common.refresh">Refresh</span></button>
+        <button class="btn btn-danger" id="logClearBtn"><svg class="ic sm"><use href="#i-delete"/></svg><span data-i18n="sys.logClear">Clear</span></button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<button class="fab" id="fabRefresh" title="Refresh"><svg class="ic"><use href="#i-refresh"/></svg></button>
+
+<div id="snackbar"><svg class="ic" id="snackIcon"><use href="#i-check_circle"/></svg><span id="snackText"></span></div>
+<div class="scrim" id="scrim">
+  <div class="dialog" role="dialog" aria-modal="true">
+    <div class="dialog-head" id="dialogTitle">Title</div>
+    <div class="dialog-body" id="dialogBody"></div>
+    <div class="dialog-actions" id="dialogActions"></div>
+  </div>
+</div>
+<div class="mask show" id="mask">
+  <div class="spinner"></div>
+  <div class="mask-text" id="maskText">加载中…</div>
+</div>

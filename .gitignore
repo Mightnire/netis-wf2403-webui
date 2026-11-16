@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.log
+chrome-profile*/
+scratch/md1/log_*.txt
+scratch/md1/capture_*.json
+firmware_backup/*.bin
+firmware_backup/*.w
+scratch/md1/shots/crop-*.png
