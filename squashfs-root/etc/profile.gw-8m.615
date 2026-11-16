@@ -97,7 +97,7 @@ echo 2048 > /proc/sys/net/core/hot_list_length
 /bin/restart_webs &
 #sh /bin/get_mac_from_pc.sh &
 
-/bin/cdrom_wizard &
+# /bin/cdrom_wizard &
 
 
 #add port trigger
@@ -140,4 +140,4 @@ echo "5" > /proc/gpio
 #telnetd &
 telnetd.sh
 
-igdmptd &
+# igdmptd &

@@ -101,7 +101,7 @@ echo "/bin/igd_hotplug" > /proc/sys/kernel/hotplug
 /bin/restart_webs &
 #sh /bin/get_mac_from_pc.sh &
 
-/bin/cdrom_wizard &
+# /bin/cdrom_wizard &
 
 
 #add port trigger
@@ -148,7 +148,7 @@ bin/wps_detect &
 telnetd.sh
 
 
-igdmptd &
+# igdmptd &
 #print.sh &
 
 /bin/smb.sh initSMBCONF

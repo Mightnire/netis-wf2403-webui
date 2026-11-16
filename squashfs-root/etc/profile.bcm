@@ -127,7 +127,7 @@ init.sh gw all wl_init &
 # daemon to monitor reload default and disable RF 
 #reload&
 
-igdmptd &
+# igdmptd &
 
 #add port trigger
 /web/cgi-bin/cgitest.cgi port_trigger &

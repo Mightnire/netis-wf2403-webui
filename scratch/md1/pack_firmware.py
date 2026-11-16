@@ -18,9 +18,10 @@ PART_SIZE = 3276800
 
 # Refuse to package the known Netcore/Netis igdmptd backdoor.
 _ROOTFS = os.path.join(BASE, "squashfs-root")
-for _rel in ("bin/igdmptd", "bin/igmptd", "usr/bin/igdmptd", "usr/sbin/igdmptd"):
+for _rel in ("bin/igdmptd", "bin/igmptd", "usr/bin/igdmptd", "usr/sbin/igdmptd",
+             "bin/cdrom_wizard", "usr/bin/cdrom_wizard", "usr/sbin/cdrom_wizard"):
     if os.path.exists(os.path.join(_ROOTFS, _rel)):
-        raise SystemExit("refusing to pack: Netcore igdmptd backdoor present: " + _rel)
+        raise SystemExit("refusing to pack: legacy Netcore daemon present: " + _rel)
 
 
 def wsum16(b):

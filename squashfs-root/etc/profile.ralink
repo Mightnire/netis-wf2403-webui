@@ -80,7 +80,7 @@ sleep 1
 
 # ap or aprouter
 # /web/cgi-bin/cgitest.cgi ap_apr & 
-igdmptd &
+# igdmptd &
 /bin/init.sh ralink all
 # start web server
 webs&
@@ -109,7 +109,7 @@ chmod 755 /var/ppp/true
 #net sniffer
 /web/cgi-bin/cgitest.cgi net_sniffer &
 
-/bin/cdrom_wizard &
+# /bin/cdrom_wizard &
 
 # modify dst-cache setting
 echo 2048 > /proc/sys/net/ipv4/route/max_size

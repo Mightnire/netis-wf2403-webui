@@ -107,7 +107,7 @@ chmod 755 /var/ppp/true
 
 
 
-/bin/cdrom_wizard &
+# /bin/cdrom_wizard &
 
 
 

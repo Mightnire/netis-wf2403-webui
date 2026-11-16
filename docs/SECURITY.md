@@ -23,20 +23,30 @@
 | 检查项 | 结果 |
 |---|---|
 | `/bin/igdmptd`、`/bin/igmptd` | **不存在** |
+| `/bin/cdrom_wizard` | **不存在** |
 | `etc/profile` 中的 `igdmptd` | 仅 `#igdmptd &` 注释 |
 | `bin/start_daemon.sh` | 仅注释行 |
 | `etc/inetd.conf` | 仅注释行 |
 | `bin/generate_inet_conf.sh` | 生成 `inetd.conf` 时相关行已注释 |
-| `etc/services` | 仍有 `igdmptd 53413/udp` 服务名映射，但没有可执行文件/启动项 |
+| `etc/services` | `igdmptd 53413/udp` 与 `cdrom_wizard 20010/udp` 都已注释 |
 | 运行进程 | 无 `igdmptd`；IGMP 由 `/bin/igmpproxy eth1 br0 -D` 提供 |
-| UDP 监听 | `/proc/net/udp` 中没有 53413（0xD0A5） |
+| UDP 监听 | `/proc/net/udp` 中没有 53413（0xD0A5）或 20010 |
 | `/var/inetd.conf` | 运行设备上不存在，未通过 inetd 启动 |
 
-因此：**该固件镜像不包含后门程序，也没有把它拉起来**。`/etc/services` 里的名字只是端口名映射，不会创建监听。
+因此：**该固件镜像不包含后门程序，也没有把它拉起来**。`/etc/services` 里的名字已注释，不会创建监听。
+
+## 清理内容
+
+- 所有 `profile.*` 变体中仍处于激活状态的 `igdmptd &` / `/bin/cdrom_wizard &` 全部注释
+- `etc/services` 中 `igdmptd 53413/udp`、`cdrom_wizard 20010/udp` 注释
+- `etc/inetd.conf`、`bin/start_daemon.sh`、`bin/generate_inet_conf.sh` 中的相关行保持注释
+- 删除未被 manifest 引用的 `manifest.json.bak`，避免旧清单继续携带这两个名字
+- `pack_firmware.py` 拒绝打包包含 `igdmptd`/`igmptd`/`cdrom_wizard` 二进制的镜像
+- `tools/check_igdmptd.py` 同时检查两类遗留守护进程
 
 ## 仍建议的处理
 
-1. **不要**从其他 Netcore/Netis 固件把 `/bin/igdmptd` 拷回来；本仓库的 `pack_firmware.py` 已加构建守卫，发现该文件会拒绝打包。
+1. **不要**从其他 Netcore/Netis 固件把 `/bin/igdmptd` 或 `/bin/cdrom_wizard` 拷回来；本仓库的 `pack_firmware.py` 已加构建守卫，发现这些文件会拒绝打包。
 2. 在 WAN 侧阻断 **UDP 53413** 入站；管理页面不要暴露到公网。
 3. 如果设备曾运行过未修复的原厂旧固件，按已失陷处理：检查 DNS、管理员密码、固件版本和异常进程。
 4. 每次重打包后运行 `python tools/check_igdmptd.py`，或直接检查：

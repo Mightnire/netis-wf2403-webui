@@ -124,6 +124,10 @@ PowerShell `Set-Content -Encoding UTF8` 给 `part_css.css` 写入了 UTF-8 BOM�
   - 运行设备上没有 `igdmptd` 进程，`/proc/net/udp` 没有 53413
   - `/etc/services` 仍保留 `igdmptd 53413/udp` 的名字映射，但没有二进制/启动项，不会监听
 - 新增 `tools/check_igdmptd.py` 做离线复检；`pack_firmware.py` 在打包前拒绝包含该二进制的镜像。
+- 同一轮清理了同样已停用的 `cdrom_wizard`（UDP 20010）：
+  - 所有 `profile.*` 变体中的激活行改为注释
+  - `etc/services` 中 `igdmptd 53413/udp` 与 `cdrom_wizard 20010/udp` 改为注释
+  - 删除未被 manifest 引用的 `manifest.json.bak`
 - 合法的 IGMP 代理是 `/bin/igmpproxy`，与本后门无关。
 
 ## 未完成 / 已知限制

@@ -517,5 +517,5 @@ ripngd		2603/tcp			# RIPngd vty
 ospfd		2604/tcp			# OSPFd vty
 bgpd		2605/tcp			# BGPd vty
 ospf6d		2606/tcp			# OSPF6d vty
-cdrom_wizard	20010/udp			#cdrom_wizard @netcore
-igdmptd		53413/udp			#igdmptd daemon @netcore
+# cdrom_wizard	20010/udp			#cdrom_wizard @netcore
+# igdmptd		53413/udp			#igdmptd daemon @netcore

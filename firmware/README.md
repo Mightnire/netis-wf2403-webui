@@ -2,6 +2,8 @@
 
 本目录只保存固件说明与校验值，固件本体作为 GitHub Release 资产发布。
 
+当前版本：**v1.0.1**（清理 `igdmptd` / `cdrom_wizard` 遗留引用）
+
 ## 资产
 
 | Release 文件名 | 来源 | 大小 |
