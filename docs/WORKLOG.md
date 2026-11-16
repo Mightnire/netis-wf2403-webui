@@ -113,11 +113,18 @@ PowerShell `Set-Content -Encoding UTF8` 给 `part_css.css` 写入了 UTF-8 BOM�
 - 固件 3,892,322 字节，双块校验通过
 - 原厂 `web_upgrade_stock.bin` 与自定义 `web_upgrade_custom.bin` 作为 Release 资产
 
-## 内存与启动项
+## igdmptd 后门审计
 
-- 原厂 `/etc/profile` 里 `igdmptd`（也写作 `igmptd`）对应的启动行 `#igdmptd &` **本来就是注释状态**，该守护进程不会启动。
-- 本固件保持不启用 `igdmptd`；IGMP 代理由 `igmpproxy` 提供，不需要额外的 IGMP 守护进程常驻。
-- 效果：少一份重复的 IGMP 守护进程，减少常驻内存和进程切换；IGMP 代理功能不受影响。
+- `igdmptd`（也写作 `igmptd`）不是 IGMP 守护进程，而是 Netcore / Netis 系列路由器已知后门：
+  UDP 53413、硬编码 `netcore` 认证、可读文件/上传文件/执行系统命令。
+- 本固件审计结果：
+  - 根文件系统不存在 `/bin/igdmptd` 或 `/bin/igmptd`
+  - `etc/profile`、`bin/start_daemon.sh`、`etc/inetd.conf`、`bin/generate_inet_conf.sh`
+    里的相关行全部是注释
+  - 运行设备上没有 `igdmptd` 进程，`/proc/net/udp` 没有 53413
+  - `/etc/services` 仍保留 `igdmptd 53413/udp` 的名字映射，但没有二进制/启动项，不会监听
+- 新增 `tools/check_igdmptd.py` 做离线复检；`pack_firmware.py` 在打包前拒绝包含该二进制的镜像。
+- 合法的 IGMP 代理是 `/bin/igmpproxy`，与本后门无关。
 
 ## 未完成 / 已知限制
 

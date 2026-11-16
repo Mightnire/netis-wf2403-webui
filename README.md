@@ -33,6 +33,12 @@
 - 客户端模式代码已按原厂接口对齐，但切模式会改变 LAN 地址，未在远程会话中做实际切换验证
 - 原厂页面图片优化（data URI）已回退，保持原厂原始布局；`index_old.htm` 仅保留内存显示修正
 
+## 安全提示：igdmptd 后门
+
+`igdmptd`（`igmptd`）是 Netcore / Netis 系列路由器的已知后门程序（UDP 53413，硬编码 `netcore`，可执行系统命令）。
+
+本项目对固件做了审计：**没有 `/bin/igdmptd`，启动项均为注释，运行时没有 53413 监听**；IGMP 代理由合法的 `igmpproxy` 提供。详见 [docs/SECURITY.md](docs/SECURITY.md)，并可用 `python tools/check_igdmptd.py` 复检。
+
 ## 目录结构
 
 ```text
@@ -50,7 +56,8 @@ scratch/md1/            构建器
   deploy_index.py       热部署原厂页面
   squashfs2_packer.py   SquashFS 2.0 写入器
 tests/e2e/harness.py    固件镜像校验工具（打包脚本使用）
-docs/                   构建、研究、工作记录
+tools/check_igdmptd.py  离线检查 igdmptd/igmptd 后门
+docs/                   构建、研究、安全、工作记录
 firmware/               固件说明与 SHA256（固件本体见 Releases）
 screenshots/            UI 截图
 ```

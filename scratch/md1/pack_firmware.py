@@ -16,6 +16,12 @@ MTD0 = os.path.join(BASE, "firmware_backup", "mtd0_boot_cfg_linux.bin")
 FW_OUT = os.path.join(BASE, "firmware_backup", "web_upgrade_custom.bin")
 PART_SIZE = 3276800
 
+# Refuse to package the known Netcore/Netis igdmptd backdoor.
+_ROOTFS = os.path.join(BASE, "squashfs-root")
+for _rel in ("bin/igdmptd", "bin/igmptd", "usr/bin/igdmptd", "usr/sbin/igdmptd"):
+    if os.path.exists(os.path.join(_ROOTFS, _rel)):
+        raise SystemExit("refusing to pack: Netcore igdmptd backdoor present: " + _rel)
+
 
 def wsum16(b):
     if len(b) % 2:

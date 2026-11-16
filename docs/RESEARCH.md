@@ -127,8 +127,8 @@ ip_forward=1
 - 内核没有 `/proc/sys/vm/drop_caches`，不能手动回收 dentry/inode 缓存
 - 无 swap
 - `/web/index.htm`、`/web/index_old.htm` 热部署时位于 tmpfs，会直接占 RAM
-- 原厂 `/etc/profile` 的 `#igdmptd &` 已是注释，`igdmptd`（`igmptd`）不启动；
-  IGMP 代理由 `igmpproxy` 提供，不需要重复守护进程
+- `igdmptd`（`igmptd`）是 Netcore/Netis 后门（UDP 53413），不是 IGMP 守护；
+  本固件无该二进制，启动项均为注释，运行设备无 53413 监听。合法的 IGMP 代理由是 `igmpproxy`
 - 停用 WPS（`wscd` + `wps_detect`）约省 0.6 MB，停 LLDP（`lld2d`）约 0.27 MB，
   停 UPnP（`mini_upnpd` + `miniigd`）约 0.5 MB
 
