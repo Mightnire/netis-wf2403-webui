@@ -84,8 +84,11 @@ python scratch\md1\pack_firmware.py
 ## 致谢与工作记录
 
 - 原厂固件逆向、CGI 协议、SquashFS/双块镜像格式：前期 AI 与手动分析
-- MD1 SPA、功能对齐、抓包验证、打包流水线：本项目 `docs/WORKLOG.md`
+- MD1 SPA、功能对齐、抓包验证、打包流水线：**DeepSeek Harness（deepseek-flash）** 编码代理
+- 项目整理、文档编写与发布：**DeepSeek Harness（deepseek-flash）** 与项目维护者
 - 原厂 WebUI 素材：Netis 官方站点（favicon / 徽标）
+
+完整过程见 `docs/WORKLOG.md`。
 
 ## 许可
 
