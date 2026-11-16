@@ -80,6 +80,31 @@ function hideMask(delay) {
   }, delay == null ? 200 : delay);
 }
 
+/* ---------- offline / reconnect ---------- */
+var offlineTimer = null;
+function showOffline() {
+  var el = $("offline");
+  if (!el) return;
+  el.classList.add("show");
+  if (!offlineTimer) {
+    offlineTimer = setInterval(function () {
+      post("topstatus_interface_parame_show.cgi", { noneed: "noneed" }).then(function (d) {
+        if (d && (d.lan_ip || d.version)) { hideOffline(); location.reload(); }
+      }).catch(function () { });
+    }, 6000);
+  }
+}
+function hideOffline() {
+  var el = $("offline");
+  if (el) el.classList.remove("show");
+  clearInterval(offlineTimer);
+  offlineTimer = null;
+}
+function retryOffline() {
+  hideOffline();
+  location.reload();
+}
+
 /* Keep browsers and password managers from auto-filling router fields. */
 function hardenInputs(root) {
   all("input", root || document).forEach(function (inp) {
@@ -266,7 +291,14 @@ function waitForRouter(timeoutSec) {
       var to = setTimeout(function () { ctrl.abort(); }, 4000);
       fetch(CGI + "topstatus_interface_parame_show.cgi", { method: "POST", body: "noneed=noneed", headers: { "Content-Type": "application/x-www-form-urlencoded" }, cache: "no-store", signal: ctrl.signal })
         .then(function (r) { clearTimeout(to); return r.text(); })
-        .then(function () {
+        .then(function (text) {
+          var d = null;
+          try { d = parseData(text); } catch (e) { d = null; }
+          if (!d || !(d.lan_ip || d.version)) {
+            failedOnce = true;
+            setTimeout(tick, 2000);
+            return;
+          }
           if (failedOnce) { resolve(true); return; }
           setTimeout(tick, 1500);
         })
@@ -491,6 +523,9 @@ function loadStatus() {
   ];
   return Promise.all(jobs.map(function (p) { return p.catch(function () { return null; }); }))
     .then(function (r) {
+      var any = !!(r[1] && (r[1].lan_ip || r[1].version)) ||
+                !!(r[0] && typeof r[0] === "object" && Object.keys(r[0]).length);
+      if (any) hideOffline(); else showOffline();
       S.data.misc = r[0];
       S.data.iface = r[1];
       S.data.stats = r[2];

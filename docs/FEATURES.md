@@ -78,8 +78,10 @@
 | 时区 / NTP | ✅ | `misc_system_gmt_set.cgi` |
 | 管理员密码 | ✅ | `UserPassSet.cgi` |
 | 远程管理 | ✅ | `Remote_Management_set.cgi` |
-| 固件升级（仅 `.bin`） | ✅ | `put_file.cgi`，等待框保持到重启完成 |
+| 固件升级（仅 `.bin`） | ✅ | 等待框保持到 CGI 就绪；跳转后数据未加载会提示重连 Wi-Fi |
 | 重启 / 恢复出厂 | ✅ | `reboot.cgi` / `RestoreDefault.cgi` |
+| 断线 / 重连提示 | ✅ | 首页 CGI 全部失败时显示“无法连接到路由器”，带重试与自动探测 |
+| 升级后页面空白保护 | ✅ | `waitForRouter` 校验 `lan_ip/version`，不再只凭 HTTP 可达就跳转 |
 | 系统日志 / 连接日志分栏 | ✅ | 系统日志过滤掉 CONNECTION 记录；连接日志解析 CSV+JSON |
 | 网络唤醒 | ✅ | `wakeup.cgi` |
 | LED 控制 | 🚫 | `led_show.cgi` 超时，固件不支持 |

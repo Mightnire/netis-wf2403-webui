@@ -2148,6 +2148,7 @@ function bind() {
   $("fwPickBtn").addEventListener("click", function () { $("fwFile").click(); });
   $("fwFile").addEventListener("change", function () { firmwarePicked(this.files && this.files[0]); });
   $("fwUpgradeBtn").addEventListener("click", upgradeFirmware);
+  $("offlineRetry").addEventListener("click", retryOffline);
   $("rebootBtn").addEventListener("click", rebootRouter);
   $("resetBtn").addEventListener("click", factoryReset);
   $("clientsRefreshBtn").addEventListener("click", loadClients);
@@ -2205,7 +2206,10 @@ function boot() {
   showMask(t("common.loading"));
   loadMode().catch(function () { }).then(function () { switchPage(initial); });
   // safety: never leave the boot mask up if a request hangs
-  setTimeout(function () { hideMask(0); }, 9000);
+  setTimeout(function () {
+    hideMask(0);
+    if (!(S.data.iface && (S.data.iface.lan_ip || S.data.iface.version))) showOffline();
+  }, 12000);
 
   setInterval(function () {
     if (S.page === "status" && !document.hidden) loadStatus();

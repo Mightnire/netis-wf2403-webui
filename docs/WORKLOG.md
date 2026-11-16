@@ -106,6 +106,17 @@ PowerShell `Set-Content -Encoding UTF8` 给 `part_css.css` 写入了 UTF-8 BOM�
 - 固件上传只允许 `.bin`，前端二次校验
 - 系统日志时间统一为 `MM-DD HH:MM:SS`，类别用 `WLAN` / `KERNEL`
 
+### 升级后首页空白 / 未重连 Wi-Fi
+
+- 现象：固件升级等待框转一段时间后跳到 `/index.htm`，页面框架出来但数据全空。
+- 原因一：`waitForRouter` 只看 HTTP 请求是否成功，路由器在 CGI 尚未就绪时就会返回页面，导致过早跳转。
+- 原因二：跳转后所有状态 CGI 失败，页面没有兜底提示。
+- 修复：
+  - `waitForRouter` 改为解析 `topstatus_interface_parame_show.cgi`，必须拿到 `lan_ip` 或 `version` 才认为恢复
+  - 首页状态接口全部失败时显示“无法连接到路由器”提示，说明检查电脑/手机是否已重新连接 WF2403 的 Wi-Fi
+  - 提供“重试”按钮，并每 6 秒自动探测，恢复后自动刷新
+  - 启动遮罩最多 12 秒，避免一直转圈
+
 ## 阶段 6：打包与发布
 
 - 新控制台 gzip 约 67 KB

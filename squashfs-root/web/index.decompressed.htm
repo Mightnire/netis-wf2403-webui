@@ -477,6 +477,28 @@ table.md td.actions { text-align: right; white-space: nowrap; }
 .dialog-body { padding: 6px 22px 18px; overflow-y: auto; color: var(--text); font-size: 14px; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 6px; padding: 8px 12px 12px; }
 
+/* ---------- Offline / reconnect prompt ---------- */
+.offline {
+  position: fixed; inset: 0; z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  padding: 24px; background: var(--bg);
+}
+.offline.show { display: flex; }
+.offline-card {
+  width: min(420px, 100%); text-align: center;
+  background: var(--surface); border: 1px solid var(--divider);
+  border-radius: var(--radius); box-shadow: var(--e2);
+  padding: 32px 26px 26px;
+}
+.offline-icon {
+  width: 64px; height: 64px; margin: 0 auto 16px;
+  display: grid; place-items: center; border-radius: 50%;
+  background: var(--primary-tint); color: var(--primary);
+}
+.offline-icon .ic { width: 32px; height: 32px; }
+.offline-title { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
+.offline-text { color: var(--text-2); font-size: 13px; line-height: 1.6; margin: 0 0 20px; }
+
 /* ---------- Busy mask ---------- */
 .mask {
   position: fixed; inset: 0; z-index: 85;
@@ -1893,6 +1915,14 @@ table.md td.actions { text-align: right; white-space: nowrap; }
   <div class="spinner"></div>
   <div class="mask-text" id="maskText">加载中…</div>
 </div>
+<div class="offline" id="offline">
+  <div class="offline-card">
+    <div class="offline-icon"><svg class="ic"><use href="#i-warning"/></svg></div>
+    <div class="offline-title" data-i18n="sys.offlineTitle">无法连接到路由器</div>
+    <p class="offline-text" data-i18n="sys.offlineText">页面没有加载到数据。请检查电脑或手机是否已重新连接到路由器的 Wi-Fi，然后重试。</p>
+    <button class="btn btn-primary" id="offlineRetry" type="button" data-i18n="common.retry">重试</button>
+  </div>
+</div>
 
 <script>
 /* ==========================================================================
@@ -1930,6 +1960,9 @@ en: {
   "common.ok": "OK",
   "common.cancel": "Cancel",
   "common.close": "Close",
+  "common.retry": "Retry",
+  "sys.offlineTitle": "Can't reach the router",
+  "sys.offlineText": "The page loaded but no data came back. Check that your computer or phone is reconnected to the WF2403 Wi-Fi, then retry.",
   "common.confirm": "Confirm",
   "common.enable": "Enabled",
   "common.disable": "Disabled",
@@ -2393,6 +2426,9 @@ zh: {
   "common.ok": "确定",
   "common.cancel": "取消",
   "common.close": "关闭",
+  "common.retry": "重试",
+  "sys.offlineTitle": "无法连接到路由器",
+  "sys.offlineText": "页面没有加载到数据。请检查电脑或手机是否已重新连接到 WF2403 的 Wi-Fi（路由器重启后可能需要手动重连），然后重试。",
   "common.confirm": "确认",
   "common.enable": "已启用",
   "common.disable": "已停用",
@@ -2912,6 +2948,31 @@ function hideMask(delay) {
   }, delay == null ? 200 : delay);
 }
 
+/* ---------- offline / reconnect ---------- */
+var offlineTimer = null;
+function showOffline() {
+  var el = $("offline");
+  if (!el) return;
+  el.classList.add("show");
+  if (!offlineTimer) {
+    offlineTimer = setInterval(function () {
+      post("topstatus_interface_parame_show.cgi", { noneed: "noneed" }).then(function (d) {
+        if (d && (d.lan_ip || d.version)) { hideOffline(); location.reload(); }
+      }).catch(function () { });
+    }, 6000);
+  }
+}
+function hideOffline() {
+  var el = $("offline");
+  if (el) el.classList.remove("show");
+  clearInterval(offlineTimer);
+  offlineTimer = null;
+}
+function retryOffline() {
+  hideOffline();
+  location.reload();
+}
+
 /* Keep browsers and password managers from auto-filling router fields. */
 function hardenInputs(root) {
   all("input", root || document).forEach(function (inp) {
@@ -3098,7 +3159,14 @@ function waitForRouter(timeoutSec) {
       var to = setTimeout(function () { ctrl.abort(); }, 4000);
       fetch(CGI + "topstatus_interface_parame_show.cgi", { method: "POST", body: "noneed=noneed", headers: { "Content-Type": "application/x-www-form-urlencoded" }, cache: "no-store", signal: ctrl.signal })
         .then(function (r) { clearTimeout(to); return r.text(); })
-        .then(function () {
+        .then(function (text) {
+          var d = null;
+          try { d = parseData(text); } catch (e) { d = null; }
+          if (!d || !(d.lan_ip || d.version)) {
+            failedOnce = true;
+            setTimeout(tick, 2000);
+            return;
+          }
           if (failedOnce) { resolve(true); return; }
           setTimeout(tick, 1500);
         })
@@ -3323,6 +3391,9 @@ function loadStatus() {
   ];
   return Promise.all(jobs.map(function (p) { return p.catch(function () { return null; }); }))
     .then(function (r) {
+      var any = !!(r[1] && (r[1].lan_ip || r[1].version)) ||
+                !!(r[0] && typeof r[0] === "object" && Object.keys(r[0]).length);
+      if (any) hideOffline(); else showOffline();
       S.data.misc = r[0];
       S.data.iface = r[1];
       S.data.stats = r[2];
@@ -5696,6 +5767,7 @@ function bind() {
   $("fwPickBtn").addEventListener("click", function () { $("fwFile").click(); });
   $("fwFile").addEventListener("change", function () { firmwarePicked(this.files && this.files[0]); });
   $("fwUpgradeBtn").addEventListener("click", upgradeFirmware);
+  $("offlineRetry").addEventListener("click", retryOffline);
   $("rebootBtn").addEventListener("click", rebootRouter);
   $("resetBtn").addEventListener("click", factoryReset);
   $("clientsRefreshBtn").addEventListener("click", loadClients);
@@ -5753,7 +5825,10 @@ function boot() {
   showMask(t("common.loading"));
   loadMode().catch(function () { }).then(function () { switchPage(initial); });
   // safety: never leave the boot mask up if a request hangs
-  setTimeout(function () { hideMask(0); }, 9000);
+  setTimeout(function () {
+    hideMask(0);
+    if (!(S.data.iface && (S.data.iface.lan_ip || S.data.iface.version))) showOffline();
+  }, 12000);
 
   setInterval(function () {
     if (S.page === "status" && !document.hidden) loadStatus();
