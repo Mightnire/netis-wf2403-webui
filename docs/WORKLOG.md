@@ -113,6 +113,12 @@ PowerShell `Set-Content -Encoding UTF8` 给 `part_css.css` 写入了 UTF-8 BOM�
 - 固件 3,892,322 字节，双块校验通过
 - 原厂 `web_upgrade_stock.bin` 与自定义 `web_upgrade_custom.bin` 作为 Release 资产
 
+## 内存与启动项
+
+- 原厂 `/etc/profile` 里 `igdmptd`（也写作 `igmptd`）对应的启动行 `#igdmptd &` **本来就是注释状态**，该守护进程不会启动。
+- 本固件保持不启用 `igdmptd`；IGMP 代理由 `igmpproxy` 提供，不需要额外的 IGMP 守护进程常驻。
+- 效果：少一份重复的 IGMP 守护进程，减少常驻内存和进程切换；IGMP 代理功能不受影响。
+
 ## 未完成 / 已知限制
 
 - 客户端/中继模式只做了请求序列模拟验证，未实际切换（会改变 LAN 地址）
