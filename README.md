@@ -6,9 +6,9 @@
 
 ## 效果
 
-| 概览 | 无线 |
+| 概览 | 局域网 |
 |---|---|
-| ![概览](screenshots/41-status-icons.png) | ![无线](screenshots/48-lan-mode.png) |
+| ![概览](screenshots/41-status-icons.png) | ![局域网](screenshots/48-lan-mode.png) |
 
 | DMZ | 访问控制 |
 |---|---|
